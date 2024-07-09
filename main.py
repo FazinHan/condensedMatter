@@ -186,7 +186,7 @@ if __name__ == "__main__":
     # t1 = time.perf_counter()
     # print(f'serialised: {np.round(t1-t0,3)}s taken')
 
-    with ProcessPoolExecutor(14) as exe:
+    with ProcessPoolExecutor(40) as exe:
         conductivities = [i for i in exe.map(main, L)]
         
     cs = CubicSpline(L, conductivities)
