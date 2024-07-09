@@ -20,7 +20,7 @@ N_i = 100
 L = 1e-8
 eta = 1e5
 
-configurations = 50000
+configurations = 5000
 k_space_size = 2000
 # k_space_size = 20
 kernel_size = 40
