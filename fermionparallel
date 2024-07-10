@@ -8,4 +8,4 @@
 
 module load conda
 
-python main.py
+echo echo
