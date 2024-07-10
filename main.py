@@ -16,11 +16,11 @@ vf = 1
 h_cut = 1
 u = 1
 l0 = 1
-N_i = 100
+N_i = 10
 L = 1e-8
 eta = 1e5
 
-configurations = 5000
+configurations = 5
 k_space_size = 2000
 # k_space_size = 20
 kernel_size = 40
