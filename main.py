@@ -21,7 +21,7 @@ L = 1e-8
 eta = 1e5
 
 configurations = 5
-k_space_size = 2000
+k_space_size = 100
 # k_space_size = 20
 kernel_size = 40
 kernel_spread = 3
@@ -75,7 +75,11 @@ def ft_potential_builder_2(N_i, k_space_size, kernel_size, function):
     r[indices[:,0],indices[:,1]] = 1
     
     # print(indices)
-    return fftconvolve(r, kernel)
+    result =  fft2(fftconvolve(r, kernel))
+
+    # print(result.shape)
+    
+    return result
 
 def fermi_dirac_ondist(x,T=0,ef=0): # T=1e7*vf*2*np.pi
     if T != 0:
@@ -116,6 +120,7 @@ def conductivity(k_space_size, L, eta, function):
     lamda = 20*2*np.pi/L
     k = np.linspace( -lamda, lamda, k_space_size )
     kxx, kyy = np.meshgrid(k, k)
+    # potential = ft_potential_builder(k_space_size, function)
     potential = ft_potential_builder_2(N_i, k_space_size, kernel_size, function)
     # plt.matshow(potential)
     # plt.show()
@@ -177,6 +182,7 @@ if __name__ == "__main__":
     
     L = np.logspace(-12,0,3*5)
     conductivities = []
+    
     # import time
 
     # t0 = time.perf_counter()
@@ -186,8 +192,8 @@ if __name__ == "__main__":
     # t1 = time.perf_counter()
     # print(f'serialised: {np.round(t1-t0,3)}s taken')
 
-    with ProcessPoolExecutor(40) as exe:
-        conductivities = [i for i in exe.map(main, L)]
+    with ProcessPoolExecutor(14) as exe:
+        conductivities = [i for i in exe.map(main)]
         
     cs = CubicSpline(L, conductivities)
 
