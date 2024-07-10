@@ -3,7 +3,7 @@
 #SBATCH --error=fermion.%J.err
 #SBATCH --output=fermion.%J.out
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
-#SBATCH --job-name=maybe.coffee
+#SBATCH --job-name=deo.double.jee
 #SBATCH --ntasks-per-node=40
 
 module load conda
