@@ -20,10 +20,10 @@ N_i = 10
 L = 1e-8
 eta = 1e5
 
-configurations = 5
+configurations = 50
 k_space_size = 100
 # k_space_size = 20
-kernel_size = 40
+kernel_size = k_space_size
 kernel_spread = 3
 # eta = 1e5 * vf * 2 * np.pi / L
 
@@ -61,9 +61,9 @@ except IndexError:
     randomness = gaussian_corr_inverse
     function = gaussian_corr
     
-def ft_potential_builder(k_space_size,icdf):
+def ft_potential_builder(N_i, k_space_size, kernel_size, function):
     r = np.random.uniform(size=(k_space_size,k_space_size))
-    r = icdf(r)
+    r = function(r)
     return fft2(r)
 
 def ft_potential_builder_2(N_i, k_space_size, kernel_size, function):
@@ -75,7 +75,7 @@ def ft_potential_builder_2(N_i, k_space_size, kernel_size, function):
     r[indices[:,0],indices[:,1]] = 1
     
     # print(indices)
-    result =  fft2(fftconvolve(r, kernel))
+    result = fft2(r) * kernel
 
     # print(result.shape)
     
@@ -131,7 +131,7 @@ def conductivity(k_space_size, L, eta, function):
                 ham = hamiltonian(kxx[kx, ky], kyy[kx, ky], potential[kx, ky])
                 E, n = np.linalg.eig(ham)
                 
-                assert np.allclose(E[0], potential[kx,ky]+(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5) or np.allclose(E[0], potential[kx,ky]-(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5), f'\n\neigenvalue miscompute: {E[0]} != {potential[kx,ky]} +- {(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5}'
+                assert np.allclose(E[0], potential[kx,ky]+(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5) or np.allclose(E[0], potential[kx,ky]-(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5), f'\n\neigenvalue miscompute: {E[0]} != {potential[kx,ky]} +- {(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5}' 
                 
                 n = [i.reshape((2,1)) for i in n]
                 g_singular += conductivity_for_n(E, n, L, eta)
@@ -157,20 +157,24 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',exis
             num -= 1
     return os.path.join('.',folder,filename(num))
 
-def plotter(L, conductivities, beta, save):
+def plotter(L, conductivities, beta, save, name='output'):
     fig, axs = plt.subplots(2,1)
     # t2 = time.perf_counter()
     # print(f'parallelised: {np.round(t2-t1,3)}s taken')
     
     axs[0].loglog(L, conductivities,'.')
     axs[1].plot(conductivities, beta,'.')
+    # axs[0].set_xlabel('$\\eta$')
     axs[0].set_xlabel('L')
     axs[0].set_ylabel('g')
     axs[1].set_xlabel('g')
     axs[1].set_ylabel('$\\beta$')
-    fig.suptitle(randomness.__name__[:-8])
+    if name=='output':    
+        fig.suptitle(randomness.__name__[:-8])
+    else:
+        fig.suptitle(name)
     fig.tight_layout()
-    name = determine_next_filename()#fname='eta_variance')
+    name = determine_next_filename(name)#fname='eta_variance')
     if save:
         plt.savefig(name)
         print('plotted to',name)
@@ -180,7 +184,7 @@ def plotter(L, conductivities, beta, save):
 if __name__ == "__main__":
 
     
-    L = np.logspace(-12,0,3*5)
+    L = np.logspace(-14,0,3*5)
     conductivities = []
     
     # import time
@@ -193,14 +197,26 @@ if __name__ == "__main__":
     # print(f'serialised: {np.round(t1-t0,3)}s taken')
 
     with ProcessPoolExecutor(14) as exe:
-        conductivities = [i for i in exe.map(main)]
+        conductivities = [i for i in exe.map(main, L)]
         
     cs = CubicSpline(L, conductivities)
 
-    name = determine_next_filename('data','npz','output data')
+    try:
+        name = sys.argv[1]
+    except IndexError:
+        name = 'data'
+
+    name = determine_next_filename(name,'npz','output data')
     with open(name,'wb') as file:
         np.savez(file, L=L, eta=eta, conductivities=conductivities, beta=cs(L,1))
         print('data written to',name)
+
+    try:
+        name = sys.argv[1]
+    except IndexError:
+        name = 'output'
+
+    import plotter; plotter.main(name)
 
     # plotter(L, conductivities, beta)
     # g = cs(L)
