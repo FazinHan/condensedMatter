@@ -105,7 +105,9 @@ def ft_potential_builder_3(L=L):
 
     '''
     k_space_size = 2000
-    >>> 14 s ± 188 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    >>> 7.81 s ± 36.2 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+    after cutting k_space to lamda, shape of kx, ky are (1436, 1436)
     '''
 
     lamda = 20*2*np.pi/L
