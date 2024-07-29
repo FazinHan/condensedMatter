@@ -103,10 +103,16 @@ def ft_potential_builder_2_5(L=L):
 
 def ft_potential_builder_3(L=L):
 
+    '''
+    k_space_size = 2000
+    >>> 14 s ± 188 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    '''
+
     lamda = 20*2*np.pi/L
     k_vec = np.linspace(-lamda, lamda, int(k_space_size**.5))
     
     cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
+    cartesian_product = cartesian_product[np.where(cartesian_product[:,0]**2+cartesian_product[:,1]**2 <= lamda**2)]
     
     k1x ,k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0])
     k1y ,k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1])
