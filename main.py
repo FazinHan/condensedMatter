@@ -13,6 +13,7 @@ vf = 1 # 1e6
 h_cut = 1
 u = 1
 l0 = l_min / 30
+l0 = 1e9
 N_i = 10
 L = 1e5
 eta = 1e-4
@@ -106,8 +107,7 @@ def ft_potential_builder_3(L=L):
     '''
     k_space_size = 2000
     >>> 7.81 s ± 36.2 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-
-    after cutting k_space to lamda, shape of kx, ky are (1436, 1436)
+    matrices shape (1436, 1436) after truncation of space
     '''
 
     lamda = 20*2*np.pi/L
