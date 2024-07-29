@@ -5,28 +5,26 @@ from scipy.interpolate import CubicSpline
 from scipy.signal import fftconvolve
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
-import os, warnings, sys
+import os, warnings, sys, time
 
-'''right now the potential is not fourier transformed: try to see what happens when transformed'''
+l_min, l_max = 1, 1e10
 
-# serialised: 36.035s taken
-# parallelised: 4.797s taken
-
-vf = 1
+vf = 1 # 1e6
 h_cut = 1
 u = 1
-l0 = 1
+l0 = l_min / 30
 N_i = 10
-L = 1e-8
-eta = 1e5
+L = 1e5
+eta = 1e-4
 
-configurations = 50
-k_space_size = 100
+configurations = 20
+k_space_size = 51
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
 # eta = 1e5 * vf * 2 * np.pi / L
 
+rng = np.random.default_rng(128)
 
 sx = np.array([[0,1],[1,0]])
 sy = 1j * np.array([[0,-1],[1,0]])
@@ -38,11 +36,11 @@ def gaussian_corr_inverse(x):
 def thomas_fermi_inverse(x):
     return u/x-1/l0
 
-def gaussian_corr(x, y):
-    return u * np.exp(-(x**2+y**2)*l0**2/2)
+def gaussian_corr(q):
+    return u * np.exp(-q**2*l0**2/2)
 
-def thomas_fermi(x, y):
-    return u / ((x**2+y**2)**.5 + l0**-1)
+def thomas_fermi(q):
+    return u / (q + l0**-1)
 
 def kernel_builder(size, function):
     axis = np.linspace(-kernel_spread, kernel_spread, size)
@@ -61,12 +59,12 @@ except IndexError:
     randomness = gaussian_corr_inverse
     function = gaussian_corr
     
-def ft_potential_builder(N_i, k_space_size, kernel_size, function):
+def ft_potential_builder(L, N_i, k_space_size, kernel_size, function):
     r = np.random.uniform(size=(k_space_size,k_space_size))
     r = function(r)
     return fft2(r)
 
-def ft_potential_builder_2(N_i, k_space_size, kernel_size, function):
+def ft_potential_builder_2(L, N_i, k_space_size, kernel_size, function):
     kernel = kernel_builder(kernel_size, function)
     rng = np.random.Generator(np.random.PCG64())
     indices = rng.integers(0, k_space_size, size=(N_i, 2))
@@ -80,6 +78,52 @@ def ft_potential_builder_2(N_i, k_space_size, kernel_size, function):
     # print(result.shape)
     
     return result
+
+def ft_potential_builder_2_5(L=L):
+
+    lamda = 20*2*np.pi/L
+    k_vec = np.linspace(-lamda, lamda, k_space_size)
+    
+    k_diag = np.diag(k_vec)
+    kxx, kyy = np.meshgrid(k_vec, k_vec)
+    # k2 = (kx**2 + ky**2)**.5
+    k_matrix = np.zeros_like(np.kron(kxx,kyy), dtype=np.complex128)
+    # return kx - ky
+
+    for kx in range(k_matrix.shape[0]):
+        for ky in range(k_matrix.shape[1]):
+            for i in range(N_i):
+                rnd_num1 = rng.standard_normal()
+                rnd_num2 = rng.standard_normal()
+                k_matrix[kx,ky] += np.exp(1j * (kxx[kx,ky] - kyy[kx,ky]) * rnd_num) * function( (kxx[kx,ky]**2 + kyy[kx,ky]**2)**.5 )
+                # plt.matshow(np.abs(k_matrix))
+                # plt.show()
+
+    return np.kron(np.eye(2),k_matrix)
+
+def ft_potential_builder_3(L=L):
+
+    lamda = 20*2*np.pi/L
+    k_vec = np.linspace(-lamda, lamda, int(k_space_size**.5))
+    
+    cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
+    
+    k1x ,k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0])
+    k1y ,k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1])
+
+    kx = k1x - k2x
+    ky = k1y - k2y
+    
+    k_matrix = np.zeros_like(kx, dtype=np.complex128)
+    
+    for i in range(N_i):
+        rands1 = rng.standard_normal(kx.shape)
+        rands2 = rng.standard_normal(ky.shape)
+        k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
+        # plt.matshow(np.abs(k_matrix))
+        # plt.show()
+
+    return np.kron(np.eye(2),k_matrix)
 
 def fermi_dirac_ondist(x,T=0,ef=0): # T=1e7*vf*2*np.pi
     if T != 0:
@@ -98,45 +142,40 @@ def fermi_dirac(x,T=0,ef=0):
         return .5
     return 1
 
-def hamiltonian(kx,ky,potential):
-    return vf * (kx*sx + ky*sy) + np.eye(2)*potential
-
-def eig_n(hamiltonian):
-    vals, vecs = np.linalg.eigh(hamiltonian)
-    return vals, vecs
+def hamiltonian(L):
+    lamda = 20*2*np.pi/L
+    k_vec = np.linspace(-lamda, lamda, k_space_size)
+    k_diag = np.diag(k_vec)
+    H0 = vf * np.kron(sx+sy, k_diag)
+    V_q = ft_potential_builder_3(L)
+    return H0 + V_q
 
 def conductivity_for_n(E, n, L, eta):
-    factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
+    sxx = np.kron(sx, np.eye(k_space_size**2))
     fd_diff = fermi_dirac(E[0]) - fermi_dirac(E[1])
-    operator = sx @ n[1] @ n[1].T.conj() @ sx
+    operator = sxx @ n[1] @ n[1].T.conj() @ sxx
     density = n[0] @ n[0].T.conj()
     diff = E[0] - E[1]
     if diff == 0:
         return 0
-    res = factor * fd_diff / diff * np.trace( density @ operator ) / ( diff + 1j * eta )
+    res = fd_diff / diff * np.trace( density @ operator ) / ( diff + 1j * eta )
     return res
 
 def conductivity(k_space_size, L, eta, function):
     lamda = 20*2*np.pi/L
     k = np.linspace( -lamda, lamda, k_space_size )
-    kxx, kyy = np.meshgrid(k, k)
-    # potential = ft_potential_builder(k_space_size, function)
-    potential = ft_potential_builder_2(N_i, k_space_size, kernel_size, function)
-    # plt.matshow(potential)
-    # plt.show()
+    potential = ft_potential_builder_3(L)
+    factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
-    for kx in range(kxx.shape[0]):
-        for ky in range(kyy.shape[0]):
-            if kxx[kx, ky]**2+kyy[kx, ky]**2 < lamda**2:
-                ham = hamiltonian(kxx[kx, ky], kyy[kx, ky], potential[kx, ky])
-                E, n = np.linalg.eig(ham)
-                
-                assert np.allclose(E[0], potential[kx,ky]+(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5) or np.allclose(E[0], potential[kx,ky]-(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5), f'\n\neigenvalue miscompute: {E[0]} != {potential[kx,ky]} +- {(kxx[kx, ky]**2+kyy[kx, ky]**2)**.5}' 
-                
-                n = [i.reshape((2,1)) for i in n]
+    for i in range(configurations):
+        ham = hamiltonian(L)
+        vals, vecs = np.linalg.eigh(ham)
+        for j in range(len(vals)):
+            for k in range(len(vals)-j):
+                E = [vals[j], vals[k]]
+                n = [vecs[j], vecs[k]]
                 g_singular += conductivity_for_n(E, n, L, eta)
-        # print(f'kxx layer {kx} complete')
-    return g_singular
+    return g_singular * factor
 
 def main(L):
         
@@ -162,13 +201,13 @@ def plotter(L, conductivities, beta, save, name='output'):
     # t2 = time.perf_counter()
     # print(f'parallelised: {np.round(t2-t1,3)}s taken')
     
-    axs[0].loglog(L, conductivities,'.')
-    axs[1].plot(conductivities, beta,'.')
+    axs[1].plot(L, conductivities,'.')
+    axs[0].plot(conductivities, beta,'.')
     # axs[0].set_xlabel('$\\eta$')
-    axs[0].set_xlabel('L')
-    axs[0].set_ylabel('g')
-    axs[1].set_xlabel('g')
-    axs[1].set_ylabel('$\\beta$')
+    axs[1].set_xlabel('L')
+    axs[1].set_ylabel('g')
+    axs[0].set_xlabel('g')
+    axs[0].set_ylabel('$\\beta$')
     if name=='output':    
         fig.suptitle(randomness.__name__[:-8])
     else:
@@ -181,26 +220,25 @@ def plotter(L, conductivities, beta, save, name='output'):
     else:
         plt.show()
 
-if __name__ == "__main__":
+if __name__ == "__main__1":
 
     
-    L = np.logspace(-14,0,3*5)
+    L = np.linspace(l_min, l_max,3*5)
     conductivities = []
     
     # import time
 
-    # t0 = time.perf_counter()
+    t0 = time.perf_counter()
 
     # cs = CubicSpline(L, [main(i) for i in L])
 
-    # t1 = time.perf_counter()
     # print(f'serialised: {np.round(t1-t0,3)}s taken')
 
     with ProcessPoolExecutor(14) as exe:
         conductivities = [i for i in exe.map(main, L)]
-        
     cs = CubicSpline(L, conductivities)
-
+    t1 = time.perf_counter()
+    print('%.2f s'%(t1-t0))
     try:
         name = sys.argv[1]
     except IndexError:
@@ -221,8 +259,10 @@ if __name__ == "__main__":
     # plotter(L, conductivities, beta)
     # g = cs(L)
 
-if __name__=="__main__1":
-    potential = ft_potential_builder_2(N_i, k_space_size, kernel_size, gaussian_corr)
-    print("potential built")
-    plt.matshow(potential.real)
+if __name__=="__main__":
+    potential3 = ft_potential_builder_3()
+    
+    print(potential3.shape)
+    
+    plt.matshow(np.abs(potential3))
     plt.show()
