@@ -13,13 +13,13 @@ vf = 1 # 1e6
 h_cut = 1
 u = 1
 l0 = l_min / 30
-l0 = 1e9
 N_i = 10
-L = 1e5
+L = l_min
+# l0 = L/30
 eta = 1e-4
 
 configurations = 20
-k_space_size = 51
+k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
@@ -102,6 +102,24 @@ def ft_potential_builder_2_5(L=L):
 
     return np.kron(np.eye(2),k_matrix)
 
+def get_k_space(L=L):
+    '''
+    k_space_size = 2000
+    58.7 ms ± 906 μs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    '''
+    lamda = 20*2*np.pi/L
+    k_vec = np.linspace(-lamda, lamda, int(k_space_size**.5))
+    
+    cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
+    cartesian_product = cartesian_product[np.where(cartesian_product[:,0]**2+cartesian_product[:,1]**2 <= lamda**2)]
+    
+    k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0])
+    k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1])
+
+    kx = k1x - k2x
+    ky = k1y - k2y
+    return kx, ky
+
 def ft_potential_builder_3(L=L):
 
     '''
@@ -110,17 +128,7 @@ def ft_potential_builder_3(L=L):
     matrices shape (1436, 1436) after truncation of space
     '''
 
-    lamda = 20*2*np.pi/L
-    k_vec = np.linspace(-lamda, lamda, int(k_space_size**.5))
-    
-    cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
-    cartesian_product = cartesian_product[np.where(cartesian_product[:,0]**2+cartesian_product[:,1]**2 <= lamda**2)]
-    
-    k1x ,k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0])
-    k1y ,k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1])
-
-    kx = k1x - k2x
-    ky = k1y - k2y
+    kx, ky = get_k_space(L)
     
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
@@ -151,9 +159,10 @@ def fermi_dirac(x,T=0,ef=0):
     return 1
 
 def hamiltonian(L):
-    lamda = 20*2*np.pi/L
-    k_vec = np.linspace(-lamda, lamda, k_space_size)
-    k_diag = np.diag(k_vec)
+    kx, ky = get_k_space(L)
+    # lamda = 20*2*np.pi/L
+    # k_vec = np.linspace(-lamda, lamda, k_space_size)
+    # k_diag = np.diag(k_vec)
     H0 = vf * np.kron(sx+sy, k_diag)
     V_q = ft_potential_builder_3(L)
     return H0 + V_q
@@ -170,8 +179,8 @@ def conductivity_for_n(E, n, L, eta):
     return res
 
 def conductivity(k_space_size, L, eta, function):
-    lamda = 20*2*np.pi/L
-    k = np.linspace( -lamda, lamda, k_space_size )
+    # lamda = 20*2*np.pi/L
+    # k = np.linspace( -lamda, lamda, int(k_space_size**.5) )
     potential = ft_potential_builder_3(L)
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
@@ -273,4 +282,5 @@ if __name__=="__main__":
     print(potential3.shape)
     
     plt.matshow(np.abs(potential3))
+    plt.colorbar()
     plt.show()
