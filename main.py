@@ -18,8 +18,8 @@ L = 1e5
 # l0 = L/30
 eta = 1e6
 
-configurations = 1
-k_space_size = 50
+configurations = 5000
+k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
