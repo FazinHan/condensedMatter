@@ -7,19 +7,19 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
-l_min, l_max = 1, 1e10
+l_min, l_max = 1, 10
 
 vf = 1 # 1e6
 h_cut = 1
 u = 1
 l0 = l_min / 30
 N_i = 10
-L = l_min
+L = 1e5
 # l0 = L/30
-eta = 1e-4
+eta = 1e6
 
-configurations = 20
-k_space_size = 2000
+configurations = 1
+k_space_size = 50
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
@@ -124,7 +124,7 @@ def ft_potential_builder_3(L=L):
 
     '''
     k_space_size = 2000
-    >>> 7.81 s ± 36.2 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    >>> 5.52 s ± 234 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
     matrices shape (1436, 1436) after truncation of space
     '''
 
@@ -158,27 +158,28 @@ def fermi_dirac(x,T=0,ef=0):
         return .5
     return 1
 
-def hamiltonian(L):
+def hamiltonian(L=L):
+    '''
+    6.27 s ± 326 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    '''
     kx, ky = get_k_space(L)
-    # lamda = 20*2*np.pi/L
-    # k_vec = np.linspace(-lamda, lamda, k_space_size)
-    # k_diag = np.diag(k_vec)
-    H0 = vf * np.kron(sx+sy, k_diag)
+    H0 = vf * (np.kron(sx, kx) + np.kron(sy, ky))
     V_q = ft_potential_builder_3(L)
     return H0 + V_q
 
 def conductivity_for_n(E, n, L, eta):
-    sxx = np.kron(sx, np.eye(k_space_size**2))
+    eta = vf * 2 * np.pi / L
+    kx, ky = get_k_space(L)
+    sxx = np.kron(sx, np.eye(kx.shape[0]))
     fd_diff = fermi_dirac(E[0]) - fermi_dirac(E[1])
-    operator = sxx @ n[1] @ n[1].T.conj() @ sxx
-    density = n[0] @ n[0].T.conj()
     diff = E[0] - E[1]
     if diff == 0:
         return 0
-    res = fd_diff / diff * np.trace( density @ operator ) / ( diff + 1j * eta )
+    res = fd_diff / diff * ( n[0].T.conj() @ (sxx @ n[1]) ) * ( n[1].T.conj() @ (sxx @ n[0]) ) / ( diff + 1j * eta )
+    # print(res)
     return res
 
-def conductivity(k_space_size, L, eta, function):
+def conductivity(k_space_size, L, eta, function): # possibly the slowest function
     # lamda = 20*2*np.pi/L
     # k = np.linspace( -lamda, lamda, int(k_space_size**.5) )
     potential = ft_potential_builder_3(L)
@@ -186,7 +187,9 @@ def conductivity(k_space_size, L, eta, function):
     g_singular = 0
     for i in range(configurations):
         ham = hamiltonian(L)
-        vals, vecs = np.linalg.eigh(ham)
+        # ham = np.eye(2872)
+        vals, vecs = np.linalg.eigh(ham) 
+        '''6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
         for j in range(len(vals)):
             for k in range(len(vals)-j):
                 E = [vals[j], vals[k]]
@@ -237,10 +240,10 @@ def plotter(L, conductivities, beta, save, name='output'):
     else:
         plt.show()
 
-if __name__ == "__main__1":
+if __name__ == "__main__":
 
     
-    L = np.linspace(l_min, l_max,3*5)
+    L = np.logspace(l_min, l_max,3*5)
     conductivities = []
     
     # import time
@@ -276,8 +279,8 @@ if __name__ == "__main__1":
     # plotter(L, conductivities, beta)
     # g = cs(L)
 
-if __name__=="__main__":
-    potential3 = ft_potential_builder_3()
+if __name__=="__main__1":
+    potential3 = hamiltonian()
     
     print(potential3.shape)
     
