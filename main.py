@@ -168,6 +168,7 @@ def hamiltonian(L=L):
     return H0 + V_q
 
 def conductivity_for_n(E, n, L, eta):
+    '''131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)'''
     eta = vf * 2 * np.pi / L
     kx, ky = get_k_space(L)
     sxx = np.kron(sx, np.eye(kx.shape[0]))
@@ -179,7 +180,7 @@ def conductivity_for_n(E, n, L, eta):
     # print(res)
     return res
 
-def conductivity(k_space_size, L, eta, function): # possibly the slowest function
+def conductivity(L, eta): # possibly the slowest function
     # lamda = 20*2*np.pi/L
     # k = np.linspace( -lamda, lamda, int(k_space_size**.5) )
     potential = ft_potential_builder_3(L)
@@ -201,7 +202,7 @@ def main(L):
         
     conductivities_summed = 0
     for i in range(configurations):
-        conductivities_summed += conductivity(k_space_size, L, eta, function)
+        conductivities_summed += conductivity(L, eta)
     if conductivities_summed.imag >= 1e-4:
         warnings.warn(f'conductivity unreal {conductivities_summed}')
     return conductivities_summed / configurations
@@ -254,7 +255,7 @@ if __name__ == "__main__":
 
     # print(f'serialised: {np.round(t1-t0,3)}s taken')
 
-    with ProcessPoolExecutor(14) as exe:
+    with ProcessPoolExecutor(15) as exe:
         conductivities = [i for i in exe.map(main, L)]
     cs = CubicSpline(L, conductivities)
     t1 = time.perf_counter()
