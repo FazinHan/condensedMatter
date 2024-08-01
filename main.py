@@ -18,8 +18,8 @@ L = 1e5
 # l0 = L/30
 eta = 1e6
 
-configurations = 40
-k_space_size = 20
+configurations = 5000
+k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
@@ -167,7 +167,7 @@ def hamiltonian(L=L):
     V_q = ft_potential_builder_3(L)
     return H0 + V_q
 
-def conductivity_for_n(E, n, L, eta):
+def conductivity_for_n(E, n, L, eta=eta):
     '''131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)'''
     eta = vf * 2 * np.pi / L
     kx, ky = get_k_space(L)
@@ -180,7 +180,7 @@ def conductivity_for_n(E, n, L, eta):
     # print(res)
     return res
 
-def conductivity(L, eta): # possibly the slowest function
+def conductivity(L=L, eta=eta): # possibly the slowest function
     potential = ft_potential_builder_3(L)
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
@@ -194,23 +194,28 @@ def conductivity(L, eta): # possibly the slowest function
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
-def main(L):
-        
-    function = lambda x: conductivity(L, eta)
+def parallel_function(x): 
+    return conductivity(L, eta)
+
+def main(L=[L]):
+
+    conductivities = [conductivity(l, eta) for l in L]
+    
+    return np.array(conductivities)
 
     # for i in range(configurations):
     #     conductivities_summed += conductivity(L, eta)
 
-    with ProcessPoolExecutor(40) as exe:
-        conductivities = np.array([i for i in exe.map(function, range(configurations))])
+    # with ProcessPoolExecutor(40) as exe:
+    #     conductivities = np.array([i for i in exe.map(parallel_function, range(configurations))])
 
-    conductivities_summed = np.sum(conductivities)
+    # conductivities_summed = np.sum(conductivities)
     
-    if conductivities_summed.imag >= 1e-4:
-        warnings.warn(f'conductivity unreal {conductivities_summed}')
-    result = conductivities_summed / configurations
-    print(result)
-    return result
+    # if conductivities_summed.imag >= 1e-4:
+    #     warnings.warn(f'conductivity unreal {conductivities_summed}')
+    # result = conductivities_summed / configurations
+    # print(result)
+    # return result
 
 def determine_next_filename(fname='output',filetype='png',folder='graphics',exists=False):
     num = 1
@@ -251,14 +256,15 @@ if __name__ == "__main__":
     
     L = np.logspace(l_min, l_max,3*5)
     # L = float(sys.argv[1])
-    conductivities = []
+    conductivities = np.zeros_like(L)
+    conductivity_per = []
     
     # import time
 
     t0 = time.perf_counter()
 
-    for l in L:
-        conductivities.append(main(l))
+    with ProcessPoolExecutor(40) as exe:
+        conductivity_per = np.fromiter(exe.map(parallel_function, range(configurations)), float)
     
     cs = CubicSpline(L, conductivities)
     t1 = time.perf_counter()
