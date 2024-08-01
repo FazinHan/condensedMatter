@@ -245,7 +245,7 @@ if __name__ == "__main__":
 
     t0 = time.perf_counter()
 
-    with ProcessPoolExecutor(40) as exe:
+    with ProcessPoolExecutor(20) as exe:
         conductivities = list(exe.map(main, lengths))
 
     conductivities = np.sum(np.array(conductivities), axis=0)

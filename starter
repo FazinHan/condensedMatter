@@ -4,7 +4,7 @@
 #SBATCH --output=fermion.%J.out
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 #SBATCH --job-name=deo.double.jee
-#SBATCH --ntasks-per-node=40
+#SBATCH --ntasks-per-node=20
 
 module load conda
 
