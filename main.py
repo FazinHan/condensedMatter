@@ -201,7 +201,7 @@ def main(L):
     # for i in range(configurations):
     #     conductivities_summed += conductivity(L, eta)
 
-    with ProcessPoolExecutor(1) as exe:
+    with ProcessPoolExecutor(40) as exe:
         conductivities = np.array([i for i in exe.map(function, range(configurations))])
 
     conductivities_summed = np.sum(conductivities)
