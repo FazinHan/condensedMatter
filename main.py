@@ -194,28 +194,11 @@ def conductivity(L=L, eta=eta): # possibly the slowest function
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
-def parallel_function(x): 
-    return conductivity(L, eta)
-
 def main(L=[L]):
 
     conductivities = [conductivity(l, eta) for l in L]
     
-    return np.array(conductivities)
-
-    # for i in range(configurations):
-    #     conductivities_summed += conductivity(L, eta)
-
-    # with ProcessPoolExecutor(40) as exe:
-    #     conductivities = np.array([i for i in exe.map(parallel_function, range(configurations))])
-
-    # conductivities_summed = np.sum(conductivities)
-    
-    # if conductivities_summed.imag >= 1e-4:
-    #     warnings.warn(f'conductivity unreal {conductivities_summed}')
-    # result = conductivities_summed / configurations
-    # print(result)
-    # return result
+    return conductivities
 
 def determine_next_filename(fname='output',filetype='png',folder='graphics',exists=False):
     num = 1
@@ -255,16 +238,17 @@ if __name__ == "__main__":
 
     
     L = np.logspace(l_min, l_max,3*5)
-    # L = float(sys.argv[1])
-    conductivities = np.zeros_like(L)
-    conductivity_per = []
+    ones = np.ones(configurations)
+    lengths, _ = np.meshgrid(L, ones)
     
     # import time
 
     t0 = time.perf_counter()
 
     with ProcessPoolExecutor(40) as exe:
-        conductivity_per = np.fromiter(exe.map(parallel_function, range(configurations)), float)
+        conductivities = list(exe.map(main, lengths))
+
+    conductivities = np.sum(np.array(conductivities), axis=0)
     
     cs = CubicSpline(L, conductivities)
     t1 = time.perf_counter()
