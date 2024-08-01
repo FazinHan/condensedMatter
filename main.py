@@ -208,7 +208,9 @@ def main(L):
     
     if conductivities_summed.imag >= 1e-4:
         warnings.warn(f'conductivity unreal {conductivities_summed}')
-    return conductivities_summed / configurations
+    result = conductivities_summed / configurations
+    print(result)
+    return result
 
 def determine_next_filename(fname='output',filetype='png',folder='graphics',exists=False):
     num = 1
