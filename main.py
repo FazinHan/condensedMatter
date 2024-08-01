@@ -18,8 +18,8 @@ L = 1e5
 # l0 = L/30
 eta = 1e6
 
-configurations = 5000
-k_space_size = 2000
+configurations = 40
+k_space_size = 20
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
@@ -181,28 +181,31 @@ def conductivity_for_n(E, n, L, eta):
     return res
 
 def conductivity(L, eta): # possibly the slowest function
-    # lamda = 20*2*np.pi/L
-    # k = np.linspace( -lamda, lamda, int(k_space_size**.5) )
     potential = ft_potential_builder_3(L)
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
-    for i in range(configurations):
-        ham = hamiltonian(L)
-        # ham = np.eye(2872)
-        vals, vecs = np.linalg.eigh(ham) 
-        '''6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
-        for j in range(len(vals)):
-            for k in range(len(vals)-j):
-                E = [vals[j], vals[k]]
-                n = [vecs[j], vecs[k]]
-                g_singular += conductivity_for_n(E, n, L, eta)
+    ham = hamiltonian(L)
+    vals, vecs = np.linalg.eigh(ham) 
+    '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
+    for j in range(len(vals)):
+        for k in range(len(vals)-j):
+            E = [vals[j], vals[k]]
+            n = [vecs[j], vecs[k]]
+            g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
 def main(L):
         
-    conductivities_summed = 0
-    for i in range(configurations):
-        conductivities_summed += conductivity(L, eta)
+    function = lambda x: conductivity(L, eta)
+
+    # for i in range(configurations):
+    #     conductivities_summed += conductivity(L, eta)
+
+    with ProcessPoolExecutor(1) as exe:
+        conductivities = np.array([i for i in exe.map(function, range(configurations))])
+
+    conductivities_summed = np.sum(conductivities)
+    
     if conductivities_summed.imag >= 1e-4:
         warnings.warn(f'conductivity unreal {conductivities_summed}')
     return conductivities_summed / configurations
@@ -245,18 +248,16 @@ if __name__ == "__main__":
 
     
     L = np.logspace(l_min, l_max,3*5)
+    # L = float(sys.argv[1])
     conductivities = []
     
     # import time
 
     t0 = time.perf_counter()
 
-    # cs = CubicSpline(L, [main(i) for i in L])
-
-    # print(f'serialised: {np.round(t1-t0,3)}s taken')
-
-    with ProcessPoolExecutor(15) as exe:
-        conductivities = [i for i in exe.map(main, L)]
+    for l in L:
+        conductivities.append(main(l))
+    
     cs = CubicSpline(L, conductivities)
     t1 = time.perf_counter()
     print('%.2f s'%(t1-t0))
@@ -271,7 +272,7 @@ if __name__ == "__main__":
         print('data written to',name)
 
     try:
-        name = sys.argv[1]
+        name = sys.argv[2]
     except IndexError:
         name = 'output'
 
