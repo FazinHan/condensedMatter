@@ -11,7 +11,8 @@ def main(name):
         eta = data['eta']
         g = data['conductivities']
         beta = data['beta']
-    plotter(L, np.abs(g), np.abs(beta), name!='output', name)
+    plotter(L[:-1], np.abs(g)[:-1], np.abs(beta)[:-1], name!='output', name)
+    # plotter(L, np.abs(g), np.abs(beta), name!='output', name)
 
 if __name__=="__main__":
     try:

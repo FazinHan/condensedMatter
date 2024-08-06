@@ -6,6 +6,7 @@ from scipy.signal import fftconvolve
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
+# from numba import jit
 
 l_min, l_max = 1, 10
 
@@ -15,10 +16,12 @@ u = 1
 l0 = l_min / 30
 N_i = 10
 L = 1e5
-# l0 = L/30
+l0 = L/30
 eta = 1e6
+T = 0
+ef = 0
 
-configurations = 5000
+configurations = 100
 k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
@@ -111,7 +114,7 @@ def get_k_space(L=L):
     k_vec = np.linspace(-lamda, lamda, int(k_space_size**.5))
     
     cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
-    cartesian_product = cartesian_product[np.where(cartesian_product[:,0]**2+cartesian_product[:,1]**2 <= lamda**2)]
+    # cartesian_product = cartesian_product[np.where(cartesian_product[:,0]**2+cartesian_product[:,1]**2 <= lamda**2)]
     
     k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0])
     k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1])
@@ -141,7 +144,7 @@ def ft_potential_builder_3(L=L):
 
     return np.kron(np.eye(2),k_matrix)
 
-def fermi_dirac_ondist(x,T=0,ef=0): # T=1e7*vf*2*np.pi
+def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
     if T != 0:
         return 1/(1+np.exp((x-ef)/T))
     out = np.zeros(x.shape)
@@ -166,6 +169,7 @@ def hamiltonian(L=L):
     H0 = vf * (np.kron(sx, kx) + np.kron(sy, ky))
     V_q = ft_potential_builder_3(L)
     return H0 + V_q
+
 
 def conductivity_for_n(E, n, L, eta=eta):
     '''131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)'''
@@ -194,11 +198,25 @@ def conductivity(L=L, eta=eta): # possibly the slowest function
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
-def main(L=[L]):
+def main2(L=L):
 
-    conductivities = [conductivity(l, eta) for l in L]
+    cond = 0
+    # conductivities = np.array([conductivity(l, eta) for l in L])
+    for i in range(configurations):
+        cond += conductivity(L, eta)
     
+    return cond / configurations
+
+def main(L=[L]): # faster locally (single node)
+
+    # cond = 0
+    conductivities = np.array([conductivity(l, eta) for l in L])
+    # for i in range(configurations):
+        # cond += conductivity(L, eta)
+    
+    # return cond / configurations
     return conductivities
+
 
 def determine_next_filename(fname='output',filetype='png',folder='graphics',exists=False):
     num = 1
@@ -234,22 +252,23 @@ def plotter(L, conductivities, beta, save, name='output'):
     else:
         plt.show()
 
+
 if __name__ == "__main__":
 
     
-    L = np.logspace(l_min, l_max,3*5)
+    L = np.linspace(l_min, l_max,3*5)
     ones = np.ones(configurations)
-    lengths, _ = np.meshgrid(L, ones)
+    l, _ = np.meshgrid(L, ones)
     
     # import time
 
     t0 = time.perf_counter()
 
-    with ProcessPoolExecutor(40) as exe:
-        conductivities = list(exe.map(main, lengths))
+    with ProcessPoolExecutor(14) as exe:
+        conductivities = list(exe.map(main, l))
 
     conductivities = np.sum(np.array(conductivities), axis=0)
-    
+    # print(conductivities.shape)
     cs = CubicSpline(L, conductivities)
     t1 = time.perf_counter()
     print('%.2f s'%(t1-t0))
@@ -273,11 +292,31 @@ if __name__ == "__main__":
     # plotter(L, conductivities, beta)
     # g = cs(L)
 
-if __name__=="__main__1":
+if __name__=="__main_1_":
+    # potential3 = hamiltonian()
+
+    t0 = time.perf_counter()
     potential3 = hamiltonian()
+    # t1 = time.perf_counter()
+    # potential4 = conductivity()
+    t2 = time.perf_counter()
     
-    print(potential3.shape)
+    # print(potential3)
+    # print(potential4)
+    # print(f'{np.round(t1-t0,5)}s using jit')
+    print(f'{np.round(t2-t0,5)}s')
+
+    fig, axs = plt.subplots(2,1,sharex=True)
     
-    plt.matshow(np.abs(potential3))
-    plt.colorbar()
-    plt.show()
+    axs[0].matshow(potential3.real, cmap='RdBu_r')
+    # axs[0,1].matshow(np.abs(potential3), cmap='RdBu_r')
+    pcm = axs[1].matshow(potential3.imag, cmap='RdBu_r')
+    axs[0].set_ylabel('real part')
+    axs[1].set_ylabel('imaginary part')
+    fig.colorbar(pcm, ax=axs, shrink=0.6)
+    # plt.colorbar(loc='bottom')
+    # print(np.allclose(potential3.real, np.abs(potential3)))
+    
+    # plt.tight_layout()
+    plt.savefig(os.path.join('graphics','full_hamiltonian.png'))
+    # plt.show()
