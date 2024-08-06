@@ -259,12 +259,14 @@ if __name__ == "__main__":
     L = np.linspace(l_min, l_max,3*5)
     ones = np.ones(configurations)
     l, _ = np.meshgrid(L, ones)
-    
-    # import time
+
+    # try:
+    #     for i in L:
+    #         os.remove(os.path.join('')
 
     t0 = time.perf_counter()
 
-    with ProcessPoolExecutor(14) as exe:
+    with ProcessPoolExecutor(40) as exe:
         conductivities = list(exe.map(main, l))
 
     conductivities = np.sum(np.array(conductivities), axis=0)
