@@ -6,6 +6,10 @@ from scipy.signal import fftconvolve
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
+from dask.distributed import Client
+from dask_jobqueue import SLURMCluster
+NUM_NODES = 10
+CORES_PER_JOB = 40
 # from numba import jit
 
 l_min, l_max = 1, 10
@@ -21,7 +25,7 @@ eta = 1e6
 T = 0
 ef = 0
 
-configurations = 100
+configurations = 5000
 k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
@@ -215,6 +219,7 @@ def main(L=[L]): # faster locally (single node)
         # cond += conductivity(L, eta)
     
     # return cond / configurations
+    print(conductivities)
     return conductivities
 
 
@@ -252,13 +257,43 @@ def plotter(L, conductivities, beta, save, name='output'):
     else:
         plt.show()
 
+def run_computation(input_array):
+    # Setup the SLURMCluster with appropriate resources
+    cluster = SLURMCluster(
+        cores=CORES_PER_JOB,                 # Number of cores per job
+        memory='192GB',           # Memory per job
+        processes=1,             # Number of processes per job
+        walltime='4-00:00:00'    # Job walltime
+        # job_extra=['--exclusive'] # Additional SLURM parameters
+    )
+
+    # Scale the cluster to the desired number of workers
+    cluster.scale(jobs=NUM_NODES)  # Number of jobs (nodes) to request
+
+    # Connect to the cluster
+    client = Client(cluster)
+
+    # Create your input array (replace this with your actual input)
+    # input_array = np.random.rand(15)
+
+    # Run the computation 5000 times
+    futures = client.map(main, [input_array] * configurations)
+
+    # Gather the results
+    results = client.gather(futures)
+
+    return np.sum(np.array(results), axis=0)/configurations
+
+    # Print or process the results
+    # print(results)
+
 
 if __name__ == "__main__":
 
     
     L = np.linspace(l_min, l_max,3*5)
     ones = np.ones(configurations)
-    l, _ = np.meshgrid(L, ones)
+    # l, _ = np.meshgrid(L, ones)
 
     # try:
     #     for i in L:
@@ -266,10 +301,11 @@ if __name__ == "__main__":
 
     t0 = time.perf_counter()
 
-    with ProcessPoolExecutor(40) as exe:
-        conductivities = list(exe.map(main, l))
+    # with ProcessPoolExecutor(40) as exe:
+        # conductivities = list(exe.map(main, l))
 
-    conductivities = np.sum(np.array(conductivities), axis=0)
+    
+    conductivities = run_computation(L)
     # print(conductivities.shape)
     cs = CubicSpline(L, conductivities)
     t1 = time.perf_counter()
@@ -294,11 +330,11 @@ if __name__ == "__main__":
     # plotter(L, conductivities, beta)
     # g = cs(L)
 
-if __name__=="__main_1_":
+if __name__=="__main__1":
     # potential3 = hamiltonian()
 
     t0 = time.perf_counter()
-    potential3 = hamiltonian()
+    potential3 = ft_potential_builder_3()
     # t1 = time.perf_counter()
     # potential4 = conductivity()
     t2 = time.perf_counter()
@@ -308,17 +344,24 @@ if __name__=="__main_1_":
     # print(f'{np.round(t1-t0,5)}s using jit')
     print(f'{np.round(t2-t0,5)}s')
 
-    fig, axs = plt.subplots(2,1,sharex=True)
+    # fig, axs = plt.subplots(2,1,sharex=True)
     
-    axs[0].matshow(potential3.real, cmap='RdBu_r')
-    # axs[0,1].matshow(np.abs(potential3), cmap='RdBu_r')
-    pcm = axs[1].matshow(potential3.imag, cmap='RdBu_r')
-    axs[0].set_ylabel('real part')
-    axs[1].set_ylabel('imaginary part')
-    fig.colorbar(pcm, ax=axs, shrink=0.6)
+    # axs[0].matshow(potential3.real, cmap='RdBu_r')
+    # # axs[0,1].matshow(np.abs(potential3), cmap='RdBu_r')
+    # pcm = axs[1].matshow(potential3.imag, cmap='RdBu_r')
+    # axs[0].set_ylabel('real part')
+    # axs[1].set_ylabel('imaginary part')
+    # for ax in axs:   
+    #     ax.axes.get_xaxis().set_ticks([])
+    #     ax.axes.get_yaxis().set_ticks([])
+    # fig.colorbar(pcm, ax=axs, shrink=0.6)
     # plt.colorbar(loc='bottom')
     # print(np.allclose(potential3.real, np.abs(potential3)))
-    
-    # plt.tight_layout()
+
+    plt.pcolormesh(np.flip(np.abs(potential3),0))#, cmap='RdBu_r')
+    plt.xticks([])
+    plt.yticks([])
+    plt.colorbar(shrink=0.6)
+    plt.tight_layout()
     plt.savefig(os.path.join('graphics','full_hamiltonian.png'))
     # plt.show()
