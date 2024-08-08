@@ -8,8 +8,12 @@ from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster
-NUM_NODES = 10
+
+NUM_NODES = 5
+MEMORY_PER_JOB = '192GB'
+PROCESSES_PER_JOB = 10
 CORES_PER_JOB = 40
+WALLTIME = '4-00:00:00'
 # from numba import jit
 
 l_min, l_max = 1, 10
@@ -261,9 +265,9 @@ def run_computation(input_array):
     # Setup the SLURMCluster with appropriate resources
     cluster = SLURMCluster(
         cores=CORES_PER_JOB,                 # Number of cores per job
-        memory='192GB',           # Memory per job
-        processes=1,             # Number of processes per job
-        walltime='4-00:00:00'    # Job walltime
+        memory=MEMORY_PER_JOB,           # Memory per job
+        processes=PROCESSES_PER_JOB,             # Number of processes per job
+        walltime=WALLTIME    # Job walltime
         # job_extra=['--exclusive'] # Additional SLURM parameters
     )
 
