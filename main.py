@@ -265,7 +265,7 @@ def run_computation(input_array):
     # Setup the SLURMCluster with appropriate resources
     cluster = SLURMCluster(
         cores=CORES_PER_JOB,                 # Number of cores per job
-        memory=MEMORY_PER_JOB,           # Memory per job
+        # memory=MEMORY_PER_JOB,           # Memory per job
         processes=PROCESSES_PER_JOB,             # Number of processes per job
         walltime=WALLTIME    # Job walltime
         # job_extra=['--exclusive'] # Additional SLURM parameters
