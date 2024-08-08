@@ -11,7 +11,7 @@ from dask_jobqueue import SLURMCluster
 
 NUM_NODES = 5
 MEMORY_PER_JOB = '192GB'
-PROCESSES_PER_JOB = 10
+PROCESSES_PER_JOB = 1
 CORES_PER_JOB = 40
 WALLTIME = '4-00:00:00'
 # from numba import jit
