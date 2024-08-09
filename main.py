@@ -29,7 +29,7 @@ eta = 1e6
 T = 0
 ef = 0
 
-configurations = 100
+configurations = 1
 k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
@@ -215,7 +215,7 @@ def main2(L=L):
     
     return cond / configurations
 
-def main(L=[L]): # faster locally (single node)
+def main(L=[np.linspace(l_min,l_max,15)]): # faster locally (single node)
 
     # cond = 0
     conductivities = np.array([conductivity(l, eta) for l in L])
@@ -223,7 +223,7 @@ def main(L=[L]): # faster locally (single node)
         # cond += conductivity(L, eta)
     
     # return cond / configurations
-    # print(conductivities)
+    print('conductivities computed')
     return conductivities
 
 
