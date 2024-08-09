@@ -6,14 +6,14 @@ from scipy.signal import fftconvolve
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
-from dask.distributed import Client
-from dask_jobqueue import SLURMCluster
+# from dask.distributed import Client
+# from dask_jobqueue import SLURMCluster
 
-NUM_NODES = 2
-MEMORY_PER_JOB = '4800M'
-PROCESSES_PER_JOB = 1
-CORES_PER_JOB = 40
-WALLTIME = '4-00:00:00'
+# NUM_NODES = 2
+# MEMORY_PER_JOB = '4800M'
+# PROCESSES_PER_JOB = 1
+# CORES_PER_JOB = 40
+# WALLTIME = '4-00:00:00'
 # from numba import jit
 
 l_min, l_max = 1, 10
@@ -30,13 +30,13 @@ T = 0
 ef = 0
 
 configurations = 5000
-k_space_size = 2000
+k_space_size = 20
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
 # eta = 1e5 * vf * 2 * np.pi / L
 
-rng = np.random.default_rng(128)
+rng = np.random.default_rng()
 
 sx = np.array([[0,1],[1,0]])
 sy = 1j * np.array([[0,-1],[1,0]])
@@ -223,19 +223,27 @@ def main(L=[L]): # faster locally (single node)
         # cond += conductivity(L, eta)
     
     # return cond / configurations
-    print(conductivities)
+    # print(conductivities)
     return conductivities
 
 
-def determine_next_filename(fname='output',filetype='png',folder='graphics',exists=False):
+def determine_next_filename(fname='output',filetype='png',folder='graphics',direc=False,exists=False):
     num = 1
+    if direc:
+        filename = lambda num: f'{fname}{num}'
+        while os.path.isdir(os.path.join('.',folder,filename(num))):
+            num += 1
+        else:
+            if exists:
+                num -= 1
+        return os.path.join(folder,filename(num))
     filename = lambda num: f'{fname}{num}.{filetype}'
     while os.path.isfile(os.path.join('.',folder,filename(num))):
         num += 1
     else:
         if exists:
             num -= 1
-    return os.path.join('.',folder,filename(num))
+    return os.path.join(folder,filename(num))
 
 def plotter(L, conductivities, beta, save, name='output'):
     fig, axs = plt.subplots(2,1)
@@ -261,37 +269,6 @@ def plotter(L, conductivities, beta, save, name='output'):
     else:
         plt.show()
 
-def run_computation(input_array):
-    # Setup the SLURMCluster with appropriate resources
-    cluster = SLURMCluster(
-        cores=CORES_PER_JOB,                 # Number of cores per job
-        # memory=MEMORY_PER_JOB,           # Memory per job
-        processes=PROCESSES_PER_JOB,             # Number of processes per job
-        walltime=WALLTIME    # Job walltime
-        # job_extra=['--exclusive'] # Additional SLURM parameters
-    )
-
-    # Scale the cluster to the desired number of workers
-    cluster.scale(jobs=NUM_NODES)  # Number of jobs (nodes) to request
-
-    # Connect to the cluster
-    client = Client(cluster)
-
-    # Create your input array (replace this with your actual input)
-    # input_array = np.random.rand(15)
-
-    # Run the computation 5000 times
-    futures = client.map(main, [input_array] * configurations)
-
-    # Gather the results
-    results = client.gather(futures)
-
-    return np.sum(np.array(results), axis=0)/configurations
-
-    # Print or process the results
-    # print(results)
-
-
 if __name__ == "__main__":
 
     
@@ -303,33 +280,38 @@ if __name__ == "__main__":
     #     for i in L:
     #         os.remove(os.path.join('')
 
-    t0 = time.perf_counter()
+    # t0 = time.perf_counter()
 
     # with ProcessPoolExecutor(40) as exe:
         # conductivities = list(exe.map(main, l))
 
     
-    conductivities = run_computation(L)
+    conductivities = main(L)
     # print(conductivities.shape)
-    cs = CubicSpline(L, conductivities)
-    t1 = time.perf_counter()
-    print('%.2f s'%(t1-t0))
-    try:
-        name = sys.argv[1]
-    except IndexError:
-        name = 'data'
+    # cs = CubicSpline(L, conductivities)
+    # t1 = time.perf_counter()
+    # print('%.2f s'%(t1-t0))
+    # try:
+    #     name = sys.argv[1]
+    # except IndexError:
+    #     name = 'data'
 
-    name = determine_next_filename(name,'npz','output data')
-    with open(name,'wb') as file:
-        np.savez(file, L=L, eta=eta, conductivities=conductivities, beta=cs(L,1))
-        print('data written to',name)
+    # name = determine_next_filename(name,'npz','output data')
+    # with open(name,'wb') as file:
+    #     np.savez(file, L=L, eta=eta, conductivities=conductivities, beta=cs(L,1))
+    #     print('data written to',name)
 
-    try:
-        name = sys.argv[2]
-    except IndexError:
-        name = 'output'
+    # try:
+    #     name = sys.argv[2]
+    # except IndexError:
+    #     name = 'output'
 
-    import plotter; plotter.main(name)
+    # import plotter; plotter.main(name)
+
+    dirname = determine_next_filename(fname='run',folder='output data',direc=True,exists=True)
+    fname = determine_next_filename(fname='output',folder=dirname, filetype='npy')
+    np.save(fname, conductivities)
+    print(f"data written to {fname}")
 
     # plotter(L, conductivities, beta)
     # g = cs(L)
