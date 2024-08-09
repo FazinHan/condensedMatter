@@ -9,6 +9,8 @@
 #SBATCH --array=1-5000%10
 #SBATCH --time=08:00:00
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
+#SBATCH --export=NONE
+#SBATCH --signal=B:SIGUSR2@300
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 module load conda
