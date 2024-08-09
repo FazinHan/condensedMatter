@@ -9,4 +9,37 @@
 #SBATCH --export=NONE
 #SBATCH --signal=B:SIGUSR2@300
 
-echo echo
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Init block: Signal when walltime is near
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Using #SBATCH to send signal (details in "create_input.py")
+# Define a function to execute and then catch the signal
+timesup() {
+    echo
+    echo "Oh no! I am approaching the time limit ..."
+    echo "I will gather some important things before it is too late!"
+    echo
+    /home/advikg.phy21.itbhu/gars_work/testgrid/emergency_stop.sh ${runstring[*]}
+}
+
+trap  "timesup"  SIGUSR2
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Main block
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+echo "========= Job started  at `date` on `hostname -s` =========="
+export OMP_NUM_THREADS=1
+
+echo "Array job id : $SLURM_ARRAY_JOB_ID"
+echo "Job id       : $SLURM_JOB_ID"
+echo "Array task id: $SLURM_ARRAY_TASK_ID"
+
+runstring=(`awk "NR == ${SLURM_ARRAY_TASK_ID:-1} + 1" testgrid_grid.param`)
+echo "Track-ID: ${runstring[0]}"
+
+cd /home/advikg.phy21.itbhu/gars_work/testgrid/
+./evolution_run1.sh ${runstring[*]} &
+wait $!
+
+echo "========= Job finished at `date` =========="
+#
