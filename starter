@@ -6,13 +6,20 @@
 #SBATCH --partition=cpu
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=52M
-#SBATCH --array=1-5000%10
+#SBATCH --array=1-5000%5000
 #SBATCH --time=08:00:00
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 #SBATCH --export=NONE
 #SBATCH --signal=B:SIGUSR2@300
 
 echo "========= Job started  at `date` on `hostname -s` =========="
+
+export OMP_NUM_THREADS=1
+
+echo "Array job id : $SLURM_ARRAY_JOB_ID"
+echo "Job id       : $SLURM_JOB_ID"
+echo "Array task id: $SLURM_ARRAY_TASK_ID"
+
 module load conda
 
 python mkdir.py
