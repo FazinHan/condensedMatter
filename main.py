@@ -29,8 +29,8 @@ eta = 1e6
 T = 0
 ef = 0
 
-configurations = 5000
-k_space_size = 20
+configurations = 100
+k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
@@ -272,8 +272,9 @@ def plotter(L, conductivities, beta, save, name='output'):
 if __name__ == "__main__":
 
     
-    L = np.linspace(l_min, l_max,3*5)
-    ones = np.ones(configurations)
+    L = [np.linspace(l_min, l_max,3*5)] * configurations
+    # print(L)
+    # ones = np.ones(configurations)
     # l, _ = np.meshgrid(L, ones)
 
     # try:
@@ -285,8 +286,8 @@ if __name__ == "__main__":
     # with ProcessPoolExecutor(40) as exe:
         # conductivities = list(exe.map(main, l))
 
-    
-    conductivities = main(L)
+    with ProcessPoolExecutor() as exe:
+        conductivities = list(exe.map(main,L))
     # print(conductivities.shape)
     # cs = CubicSpline(L, conductivities)
     # t1 = time.perf_counter()
@@ -308,9 +309,10 @@ if __name__ == "__main__":
 
     # import plotter; plotter.main(name)
 
-    dirname = determine_next_filename(fname='run',folder='output data',direc=True,exists=True)
+    dirname = determine_next_filename(fname='run',folder='output_data',direc=True,exists=True)
     fname = determine_next_filename(fname='output',folder=dirname, filetype='npy')
     np.save(fname, conductivities)
+    # print(np.array(conductivities))
     print(f"data written to {fname}")
 
     # plotter(L, conductivities, beta)
