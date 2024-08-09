@@ -5,7 +5,7 @@
 #SBATCH --partition=cpu
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=4800M
-#SBATCH --array=1-5000%500
+#SBATCH --array=1-5000%50
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 #SBATCH --export=NONE
 #SBATCH --signal=B:SIGUSR2@300
