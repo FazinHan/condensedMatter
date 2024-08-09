@@ -6,7 +6,7 @@
 #SBATCH --partition=cpu
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=52M
-#SBATCH --array=1-30%5000
+#SBATCH --array=1-20%5000
 #SBATCH --export=NONE
 
 echo "========= Job started  at `date` on `hostname -s` =========="
