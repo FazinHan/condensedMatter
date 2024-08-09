@@ -12,6 +12,22 @@
 #SBATCH --export=NONE
 #SBATCH --signal=B:SIGUSR2@300
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Init block: Signal when walltime is near
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Using #SBATCH to send signal (details in "create_input.py")
+# Define a function to execute and then catch the signal
+timesup() {
+    echo
+    echo "Oh no! I am approaching the time limit ..."
+    echo "I will gather some important things before it is too late!"
+    echo
+    /home/advikg.phy21.itbhu/gars_work/testgrid/emergency_stop.sh ${runstring[*]}
+}
+
+trap  "timesup"  SIGUSR2
+
+
 echo "========= Job started  at `date` on `hostname -s` =========="
 
 export OMP_NUM_THREADS=1
