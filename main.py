@@ -9,7 +9,7 @@ import os, warnings, sys, time
 from dask.distributed import Client
 from dask_jobqueue import SLURMCluster
 
-NUM_NODES = 3
+NUM_NODES = 2
 MEMORY_PER_JOB = '4800M'
 PROCESSES_PER_JOB = 1
 CORES_PER_JOB = 40
