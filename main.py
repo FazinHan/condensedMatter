@@ -29,7 +29,7 @@ eta = 1e6
 T = 0
 ef = 0
 
-configurations = 1
+configurations = 100
 k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
@@ -223,8 +223,11 @@ def main(L=[np.linspace(l_min,l_max,15)]): # faster locally (single node)
         # cond += conductivity(L, eta)
     
     # return cond / configurations
-    print('conductivities computed')
-    return conductivities
+    dirname = determine_next_filename(fname='run',folder='output_data',direc=True,exists=True)
+    fname = determine_next_filename(fname='output',folder=dirname, filetype='npy')
+    np.save(fname, conductivities)
+    print('conductivities computed and stored')
+    # return conductivities
 
 
 def determine_next_filename(fname='output',filetype='png',folder='graphics',direc=False,exists=False):
@@ -286,6 +289,7 @@ if __name__ == "__main__":
     # with ProcessPoolExecutor(40) as exe:
         # conductivities = list(exe.map(main, l))
 
+
     with ProcessPoolExecutor() as exe:
         conductivities = list(exe.map(main,L))
     # print(conductivities.shape)
@@ -309,11 +313,10 @@ if __name__ == "__main__":
 
     # import plotter; plotter.main(name)
 
-    dirname = determine_next_filename(fname='run',folder='output_data',direc=True,exists=True)
-    fname = determine_next_filename(fname='output',folder=dirname, filetype='npy')
-    np.save(fname, conductivities)
+    
+    # np.save(fname, conductivities)
     # print(np.array(conductivities))
-    print(f"data written to {fname}")
+    # print(f"data written to {fname}")
 
     # plotter(L, conductivities, beta)
     # g = cs(L)
