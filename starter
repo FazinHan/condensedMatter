@@ -1,11 +1,12 @@
 #!/bin/bash
+#SBATCH -A=
 #SBATCH --job-name=tilted.fermion
 #SBATCH --output=output_run1/fermion.out
 #SBATCH --error=output_run1/fermion.err
 #SBATCH --partition=cpu
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=4800M
-#SBATCH --array=1-5000%100
+#SBATCH --mem-per-cpu=52M
+#SBATCH --array=1-5000%1000
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 
 echo "========= Job started  at `date` on `hostname -s` =========="
