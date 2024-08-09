@@ -1,0 +1,12 @@
+#!/bin/bash
+#SBATCH --job-name=testgrid_run1
+#SBATCH --output=output_run1/testgrid_run1_%A_%a.out
+#SBATCH --time=08:00:00
+#SBATCH --partition=cpu
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=4800M
+#SBATCH --array=1-10%10
+#SBATCH --export=NONE
+#SBATCH --signal=B:SIGUSR2@300
+
+echo echo
