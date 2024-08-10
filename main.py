@@ -1,7 +1,6 @@
 import numpy as np
 from scipy import stats
 from scipy.fft import fft2, rfft2
-from scipy.interpolate import CubicSpline
 from scipy.signal import fftconvolve
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
@@ -30,6 +29,7 @@ T = 0
 ef = 0
 
 configurations = 100
+interaction_distance = 3
 k_space_size = 2000
 # k_space_size = 20
 kernel_size = k_space_size
@@ -200,10 +200,13 @@ def conductivity(L=L, eta=eta): # possibly the slowest function
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     for j in range(len(vals)):
-        for k in range(len(vals)-j):
-            E = [vals[j], vals[k]]
-            n = [vecs[j], vecs[k]]
-            g_singular += conductivity_for_n(E, n, L, eta)
+        for k in range(-interaction_distance,interaction_distance):
+            try:
+                E = [vals[j], vals[j+k]]
+                n = [vecs[j], vecs[j+k]]
+                g_singular += conductivity_for_n(E, n, L, eta)
+            except IndexError:
+                pass
     return g_singular * factor
 
 def main2(L=L):
@@ -276,6 +279,9 @@ if __name__ == "__main__":
 
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
+    dirname = determine_next_filename(fname='run',folder='output_data',direc=True,exists=True)
+    fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
+    np.save(fname, L[0])
     # print(L)
     # ones = np.ones(configurations)
     # l, _ = np.meshgrid(L, ones)
