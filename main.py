@@ -226,7 +226,7 @@ def main(L=[np.linspace(l_min,l_max,15)]): # faster locally (single node)
         # cond += conductivity(L, eta)
     
     # return cond / configurations
-    dirname = determine_next_filename(fname='run',folder='output_data',direc=True,exists=True)
+    dirname = sys.argv[1]
     fname = determine_next_filename(fname='output',folder=dirname, filetype='npy')
     np.save(fname, conductivities)
     print('conductivities computed and stored')
@@ -279,7 +279,7 @@ if __name__ == "__main__":
 
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
-    dirname = determine_next_filename(fname='run',folder='output_data',direc=True,exists=True)
+    dirname = sys.argv[1]
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
     # print(L)

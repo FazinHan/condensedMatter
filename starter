@@ -18,12 +18,12 @@ echo "Array task id: $SLURM_ARRAY_TASK_ID"
 
 module load conda
 
-python mkdir.py
+dirname=(`python mkdir.py`)
 
 runstring=(`echo ${SLURM_ARRAY_TASK_ID:-1}`)
 echo "Track-ID: ${runstring[0]}"
 
-python main.py ${runstring[*]} &
+python main.py ${dirname} ${runstring[*]} &
 wait $!
 
 echo "========= Job finished at `date` =========="
