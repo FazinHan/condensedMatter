@@ -30,7 +30,7 @@ ef = 0
 
 configurations = 100
 interaction_distance = 3
-k_space_size = 2000
+k_space_size = 51
 # k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
@@ -180,7 +180,9 @@ def hamiltonian(L=L):
 
 
 def conductivity_for_n(E, n, L, eta=eta):
-    '''131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)'''
+    '''
+    131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    '''
     eta = vf * 2 * np.pi / L
     kx, ky = get_k_space(L)
     sxx = np.kron(sx, np.eye(kx.shape[0]))
