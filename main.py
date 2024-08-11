@@ -19,7 +19,7 @@ eta = 1e6
 T = 0
 ef = 0
 
-configurations = 1
+configurations = 100
 interaction_distance = 3
 k_space_size = 51
 # k_space_size = 20
