@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 def main(name):
     conductivities = []
     dirname = 'output_data'
-    # fname = determine_next_filename('output','npy','output_data',exists=True)
+    version = determine_next_filename('results_version','output_data',direc=True,exists=True)
     
+    # for root, _, fnames in os.walk(version):
     for root, _, fnames in os.walk(dirname):
         for fname in fnames:
             with open(os.path.join(root, fname),'rb') as file:

@@ -14,7 +14,7 @@ u = 1
 l0 = l_min / 30
 N_i = 10
 L = 1e5
-l0 = L/30
+# l0 = L/30
 eta = 1e6
 T = 0
 ef = 0
@@ -282,6 +282,21 @@ if __name__ == "__main__":
     dirname = sys.argv[1]
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
+
+    with open('params.txt','w') as file:
+        text = f'''l_min, l_max = {l_min}, {l_max}
+            vf = {vf}
+            h_cut = {h_cut}
+            u = {u}
+            l0 = {l0}
+            N_i = {N_i}
+            eta = {eta}
+            T = {T}
+            ef = {ef}
+            configurations = {configurations}
+            k_space_size = {k_space_size}'''
+        file.write(text)
+    
     # print(L)
     # ones = np.ones(configurations)
     # l, _ = np.meshgrid(L, ones)
