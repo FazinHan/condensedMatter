@@ -6,20 +6,24 @@ import matplotlib.pyplot as plt
 
 def main(name):
     conductivities = []
-    dirname = determine_next_filename(fname='run',folder='output_data',direc=True,exists=True)
+    dirname = 'output_data'
     # fname = determine_next_filename('output','npy','output_data',exists=True)
     
-    for _, _, fnames in os.walk(dirname):
+    for root, _, fnames in os.walk(dirname):
         for fname in fnames:
-            if 'length' not in fname:
-                with open(os.path.join(dirname, fname),'rb') as file:
-                    conductivities.append(np.load(file))
+            with open(os.path.join(root, fname),'rb') as file:
+                data = np.load(file)
+                # print(1)
+                conductivities.append(data)
     conductivities = np.array(conductivities)
     conductivities = np.sum(conductivities, axis=0)
     
-    fname = determine_next_filename(fname='length',folder=dirname, filetype='npy',exists=True)
+    fname = os.path.join(dirname, 'run1','length1.npy')
     with open(fname,'rb') as file:
         L = np.load(file)
+
+    # print(conductivities.shape)
+    # print(L.shape)
 
     # print(L.shape)
     cs = CubicSpline(L, conductivities)

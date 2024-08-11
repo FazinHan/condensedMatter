@@ -5,15 +5,6 @@ from scipy.signal import fftconvolve
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
-# from dask.distributed import Client
-# from dask_jobqueue import SLURMCluster
-
-# NUM_NODES = 2
-# MEMORY_PER_JOB = '4800M'
-# PROCESSES_PER_JOB = 1
-# CORES_PER_JOB = 40
-# WALLTIME = '4-00:00:00'
-# from numba import jit
 
 l_min, l_max = 1, 10
 
@@ -28,7 +19,7 @@ eta = 1e6
 T = 0
 ef = 0
 
-configurations = 100
+configurations = 1
 interaction_distance = 3
 k_space_size = 51
 # k_space_size = 20
@@ -115,8 +106,8 @@ def ft_potential_builder_2_5(L=L):
 
 def get_k_space(L=L):
     '''
-    k_space_size = 2000
-    58.7 ms ± 906 μs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    k_space_size = 51
+    161 μs ± 5.12 μs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
     '''
     lamda = 20*2*np.pi/L
     k_vec = np.linspace(-lamda, lamda, int(k_space_size**.5))
@@ -134,9 +125,8 @@ def get_k_space(L=L):
 def ft_potential_builder_3(L=L):
 
     '''
-    k_space_size = 2000
-    >>> 5.52 s ± 234 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-    matrices shape (1436, 1436) after truncation of space
+    k_space_size = 51
+    >>> 4.14 ms ± 327 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
     '''
 
     kx, ky = get_k_space(L)
@@ -144,8 +134,8 @@ def ft_potential_builder_3(L=L):
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
     for i in range(N_i):
-        rands1 = rng.standard_normal(kx.shape)
-        rands2 = rng.standard_normal(ky.shape)
+        rands1 = np.ones_like(kx)*rng.standard_normal()
+        rands2 = np.ones_like(ky)*rng.standard_normal()
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
         # plt.matshow(np.abs(k_matrix))
         # plt.show()
@@ -171,7 +161,7 @@ def fermi_dirac(x,T=0,ef=0):
 
 def hamiltonian(L=L):
     '''
-    6.27 s ± 326 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    4.4 ms ± 382 μs per loop (mean ± std. dev. of 7 runs, 100 loops each) -> k_space_size = 51
     '''
     kx, ky = get_k_space(L)
     H0 = vf * (np.kron(sx, kx) + np.kron(sy, ky))
@@ -181,7 +171,7 @@ def hamiltonian(L=L):
 
 def conductivity_for_n(E, n, L, eta=eta):
     '''
-    131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each) -> k_space_size = 2000
     '''
     eta = vf * 2 * np.pi / L
     kx, ky = get_k_space(L)
@@ -195,20 +185,28 @@ def conductivity_for_n(E, n, L, eta=eta):
     return res
 
 def conductivity(L=L, eta=eta): # possibly the slowest function
+    '''
+    1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
+    '''
     potential = ft_potential_builder_3(L)
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
     ham = hamiltonian(L)
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
+    # for j in range(len(vals)):
+    #     for k in range(-interaction_distance,interaction_distance):
+    #         try:
+    #             E = [vals[j], vals[j+k]]
+    #             n = [vecs[j], vecs[j+k]]
+    #             g_singular += conductivity_for_n(E, n, L, eta)
+    #         except IndexError:
+    #             pass
     for j in range(len(vals)):
-        for k in range(-interaction_distance,interaction_distance):
-            try:
-                E = [vals[j], vals[j+k]]
-                n = [vecs[j], vecs[j+k]]
-                g_singular += conductivity_for_n(E, n, L, eta)
-            except IndexError:
-                pass
+        for k in range(len(vals)-j):
+            E = [vals[j], vals[k]]
+            n = [vecs[j], vecs[k]]
+            g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
 def main2(L=L):
