@@ -18,6 +18,7 @@ L = 1e5
 eta = 1e6
 T = 0
 ef = 0
+a = 1
 
 configurations = 500
 interaction_distance = 3
@@ -134,8 +135,8 @@ def ft_potential_builder_3(L=L):
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
     for i in range(N_i):
-        rands1 = np.ones_like(kx)*rng.standard_normal()
-        rands2 = np.ones_like(ky)*rng.standard_normal()
+        rands1 = np.ones_like(kx)*rng.uniform(high=a)
+        rands2 = np.ones_like(ky)*rng.uniform(high=a)
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
         # plt.matshow(np.abs(k_matrix))
         # plt.show()
@@ -262,16 +263,17 @@ if __name__ == "__main__":
     os.mkdir(os.path.join('output_data','params'))
     with open(os.path.join('output_data','params','params.txt'),'w') as file:
         text = f'''l_min, l_max = {l_min}, {l_max}
-            vf = {vf}
-            h_cut = {h_cut}
-            u = {u}
-            l0 = {l0}
-            N_i = {N_i}
-            eta = {eta}
-            T = {T}
-            ef = {ef}
-            configurations = {configurations}
-            k_space_size = {k_space_size}'''
+vf = {vf}
+h_cut = {h_cut}
+u = {u}
+l0 = {l0}
+N_i = {N_i}
+eta = {eta}
+T = {T}
+ef = {ef}
+configurations = {configurations}
+k_space_size = {k_space_size}
+a = {a}'''
         file.write(text)
         print('parameter file written')
     
