@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
-l_min, l_max = 0,1
+l_min, l_max = 0.01,1
 
 vf = 1 # 1e6
 h_cut = 1
@@ -259,7 +259,8 @@ if __name__ == "__main__":
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
 
-    with open(os.path.join('output_data','params.txt'),'w') as file:
+    os.mkdir(os.path.join('output_data','params'))
+    with open(os.path.join('output_data','params','params.txt'),'w') as file:
         text = f'''l_min, l_max = {l_min}, {l_max}
             vf = {vf}
             h_cut = {h_cut}
