@@ -11,8 +11,8 @@ rng = np.random.default_rng()
 
 def calc_g():
     sleep(1)
-    u = rng.standard_normal()
-    u1 = rng.standard_normal()
+    u = rng.uniform()
+    u1 = rng.uniform()
     print(u, u1)
 
 futures = {}
