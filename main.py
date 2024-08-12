@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
-l_min, l_max = 1, 10
+l_min, l_max = 0,1
 
 vf = 1 # 1e6
 h_cut = 1
@@ -250,30 +250,6 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
         if exists:
             num -= 1
     return os.path.join(folder,filename(num))
-
-def plotter(L, conductivities, beta, save, name='output'):
-    fig, axs = plt.subplots(2,1)
-    # t2 = time.perf_counter()
-    # print(f'parallelised: {np.round(t2-t1,3)}s taken')
-    
-    axs[1].plot(L, conductivities,'.')
-    axs[0].plot(conductivities, beta,'.')
-    # axs[0].set_xlabel('$\\eta$')
-    axs[1].set_xlabel('L')
-    axs[1].set_ylabel('g')
-    axs[0].set_xlabel('g')
-    axs[0].set_ylabel('$\\beta$')
-    if name=='output':    
-        fig.suptitle(randomness.__name__[:-8])
-    else:
-        fig.suptitle(name)
-    fig.tight_layout()
-    name = determine_next_filename(name)#fname='eta_variance')
-    if save:
-        plt.savefig(name)
-        print('plotted to',name)
-    else:
-        plt.show()
 
 if __name__ == "__main__":
 
