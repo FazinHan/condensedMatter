@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
+# importing the module
+import tracemalloc
+# starting the monitoring
+
+
 l_min, l_max = 0.01,1
 
 vf = 1 # 1e6
@@ -253,6 +258,12 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
 
 if __name__ == "__main__":
 
+    tracemalloc.start()
+
+# function call
+
+# displaying the memory
+
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
     dirname = sys.argv[1]
@@ -319,6 +330,12 @@ if __name__ == "__main__":
 
     # plotter(L, conductivities, beta)
     # g = cs(L)
+
+    print(tracemalloc.get_traced_memory())
+    
+    # stopping the library
+    tracemalloc.stop()
+
 
 if __name__=="__main__1":
     # potential3 = hamiltonian()
