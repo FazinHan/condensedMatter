@@ -19,7 +19,7 @@ eta = 1e6
 T = 0
 ef = 0
 
-configurations = 100
+configurations = 500
 interaction_distance = 3
 k_space_size = 51
 # k_space_size = 20
@@ -296,6 +296,7 @@ if __name__ == "__main__":
             configurations = {configurations}
             k_space_size = {k_space_size}'''
         file.write(text)
+        print('parameter file written')
     
     # print(L)
     # ones = np.ones(configurations)

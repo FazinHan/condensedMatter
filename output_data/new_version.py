@@ -25,6 +25,10 @@ if cwd == 'output_data':
     os.mkdir(dname)
     
     for root, dirs, fnames in os.walk('.'):
+        # print(root,dirs)
         for direc in dirs:
-            if direc != '.ipynb_checkpoints' and 'results_version' not in dname:
-                os.rename(direc,os.path.join(root,dname,direc))
+            # print(direc[:15])
+            if direc == '.ipynb_checkpoints' or  direc[:15] == 'results_version':
+                continue
+            os.rename(direc,os.path.join(root,dname,direc))
+                # print(root,dname,direc)

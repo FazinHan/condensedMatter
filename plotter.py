@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 def main(name):
     conductivities = []
     dirname = 'output_data'
-    version = determine_next_filename('results_version','output_data',direc=True,exists=True)
+    version = determine_next_filename('results_version',folder='output_data',direc=True,exists=True)
     
-    # for root, _, fnames in os.walk(version):
-    for root, _, fnames in os.walk(dirname):
+    for root, _, fnames in os.walk(version):
+    # for root, _, fnames in os.walk(dirname):
         for fname in fnames:
             with open(os.path.join(root, fname),'rb') as file:
                 data = np.load(file)
@@ -19,7 +19,7 @@ def main(name):
     conductivities = np.array(conductivities)
     conductivities = np.sum(conductivities, axis=0)
     
-    fname = os.path.join(dirname, 'run1','length1.npy')
+    fname = os.path.join(version, 'run1','length1.npy')
     with open(fname,'rb') as file:
         L = np.load(file)
 
