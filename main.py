@@ -283,7 +283,7 @@ if __name__ == "__main__":
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
 
-    with open('params.txt','w') as file:
+    with open(os.path.join('output_data','params.txt'),'w') as file:
         text = f'''l_min, l_max = {l_min}, {l_max}
             vf = {vf}
             h_cut = {h_cut}
