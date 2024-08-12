@@ -20,7 +20,7 @@ T = 0
 ef = 0
 a = 1
 
-configurations = 500
+configurations = 20
 interaction_distance = 3
 k_space_size = 51
 # k_space_size = 20
@@ -219,13 +219,17 @@ def main2(L=L):
     
     return cond / configurations
 
-def main(L=[np.linspace(l_min,l_max,15)]): # faster locally (single node)
+def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
     # cond = 0
     conductivities = np.array([conductivity(l, eta) for l in L])
     # for i in range(configurations):
         # cond += conductivity(L, eta)
-    
+
+    assert np.alltrue(conductivities.imag < 1e-21)
+
+    conductivities = np.array(conductivities.real, dtype=np.float64)
+
     # return cond / configurations
     dirname = sys.argv[1]
     fname = determine_next_filename(fname='output',folder=dirname, filetype='npy')
@@ -256,24 +260,14 @@ if __name__ == "__main__":
 
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
+    
     dirname = sys.argv[1]
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
     if not os.path.isfile(os.path.join('output_data','params','params.txt')):
         os.mkdir(os.path.join('output_data','params'))
         with open(os.path.join('output_data','params','params.txt'),'w') as file:
-            text = f'''l_min, l_max = {l_min}, {l_max}
-vf = {vf}
-h_cut = {h_cut}
-u = {u}
-l0 = {l0}
-N_i = {N_i}
-eta = {eta}
-T = {T}
-ef = {ef}
-configurations = {configurations}
-k_space_size = {k_space_size}
-a = {a}'''
+            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\na = {a}'''
             file.write(text)
             print('parameter file written')
     
@@ -291,8 +285,10 @@ a = {a}'''
         # conductivities = list(exe.map(main, l))
 
 
-    with ProcessPoolExecutor() as exe:
-        conductivities = list(exe.map(main,L))
+    # with ProcessPoolExecutor() as exe:
+    #     conductivities = list(exe.map(main,L))
+
+    [main(i) for i in L]
     # print(conductivities.shape)
     # cs = CubicSpline(L, conductivities)
     # t1 = time.perf_counter()

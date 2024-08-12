@@ -33,7 +33,7 @@ def main(save):
     dirname = 'output_data'
     version = determine_next_filename('results_version',folder='output_data',direc=True,exists=True)
 
-    directory = version
+    directory = dirname
     
     for root, _, fnames in os.walk(directory):
     # for root, _, fnames in os.walk(dirname):
