@@ -259,10 +259,10 @@ if __name__ == "__main__":
     dirname = sys.argv[1]
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
-
-    os.mkdir(os.path.join('output_data','params'))
-    with open(os.path.join('output_data','params','params.txt'),'w') as file:
-        text = f'''l_min, l_max = {l_min}, {l_max}
+    if not os.path.isfile(os.path.join('output_data','params','params.txt')):
+        os.mkdir(os.path.join('output_data','params'))
+        with open(os.path.join('output_data','params','params.txt'),'w') as file:
+            text = f'''l_min, l_max = {l_min}, {l_max}
 vf = {vf}
 h_cut = {h_cut}
 u = {u}
@@ -274,8 +274,8 @@ ef = {ef}
 configurations = {configurations}
 k_space_size = {k_space_size}
 a = {a}'''
-        file.write(text)
-        print('parameter file written')
+            file.write(text)
+            print('parameter file written')
     
     # print(L)
     # ones = np.ones(configurations)
