@@ -22,7 +22,9 @@ module load conda
 runstring=(`echo ${SLURM_ARRAY_TASK_ID:-1}`)
 echo "Track-ID: ${runstring[0]}"
 
-for num in {0..9}
+ntasks=${SLURM_NTASKS:-1}
+
+for i in $(seq 1 $ntasks)
 
 do
 srun --exclusive --ntasks=1 mkdir output_data/run${num}${runstring[*]} && python main.py ${num}${runstring[*]} &
