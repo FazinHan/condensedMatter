@@ -27,7 +27,7 @@ ntasks=${SLURM_NTASKS:-1}
 for i in $(seq 1 $ntasks)
 
 do
-srun --exclusive --ntasks=1 mkdir output_data/run${num}${runstring[*]} && python main.py ${num}${runstring[*]} &
+srun --exclusive --ntasks=1 mkdir output_data/run${runstring[*]}${num} && python main.py ${runstring[*]}${num} &
 done
 
 wait $!
