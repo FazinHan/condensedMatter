@@ -231,9 +231,9 @@ def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
     conductivities = str(conductivities.real.tolist())
 
     # return cond / configurations
-    # dirname = os.path.join('output_data','run'+sys.argv[1])
-    # fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
-    # write_file(fname, conductivities)
+    dirname = os.path.join('output_data','run'+sys.argv[1])
+    fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
+    write_file(fname, conductivities)
     print('conductivities computed and stored')
     # return conductivities
 
