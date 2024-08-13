@@ -185,7 +185,7 @@ def conductivity_for_n(E, n, L, eta=eta):
     # print(res)
     return res
 
-def conductivity(L=L, eta=eta, R_I): # possibly the slowest function
+def conductivity(L=L, eta=eta, R_I=rng.uniform(high=a,size=(2,N_i))): # possibly the slowest function
     '''
     1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
     '''
