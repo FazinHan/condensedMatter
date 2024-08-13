@@ -57,7 +57,7 @@ def main(save):
     cs = CubicSpline(L, conductivities)
     g = cs(L)
     beta = cs(L, 1)
-    plotter(L[:-1], np.abs(g)[:-1], np.abs(beta)[:-1], save, folder=directory)
+    plotter(L[:-1], np.abs(g)[:-1], np.abs(beta)[:-1], save, folder=dirname)
     # plotter(L, np.abs(g), np.abs(beta), name!='output', name)
 
 if __name__=="__main__":
