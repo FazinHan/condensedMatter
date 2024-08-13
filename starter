@@ -18,12 +18,17 @@ echo "Array job id : $SLURM_ARRAY_JOB_ID"
 echo "Job id       : $SLURM_JOB_ID"
 echo "Array task id: $SLURM_ARRAY_TASK_ID"
 
+module load conda
+
 runstring=(`echo ${SLURM_ARRAY_TASK_ID:-1}`)
 echo "Track-ID: ${runstring[0]}"
 
 for num in {0..3}
 
 do
+cd output_data
+python new_version.py
+cd ..
 mkdir output_data/run${runstring[*]}
 srun --exclusive --ntasks=1 module load conda && python main.py ${runstring[*]} &
 done
