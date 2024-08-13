@@ -38,8 +38,8 @@ def main(save):
     for root, _, fnames in os.walk(directory):
     # for root, _, fnames in os.walk(dirname):
         for fname in fnames:
-            with open(os.path.join(root, fname),'rb') as file:
-                data = np.load(file)
+            with open(os.path.join(root, fname),'r') as file:
+                data = eval(file.read())
                 # print(1)
                 conductivities.append(data)
     conductivities = np.array(conductivities)
