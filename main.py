@@ -123,7 +123,7 @@ def get_k_space(L=L):
     ky = k1y - k2y
     return kx, ky
 
-def ft_potential_builder_3(L=L):
+def ft_potential_builder_3(L=L, R_I=rng.uniform(high=a,size=(2,N_i)))):
 
     '''
     k_space_size = 51
@@ -135,8 +135,8 @@ def ft_potential_builder_3(L=L):
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
     for i in range(N_i):
-        rands1 = np.ones_like(kx)*rng.uniform(high=a)
-        rands2 = np.ones_like(ky)*rng.uniform(high=a)
+        rands1 = np.ones_like(kx)*R_I[0,i]
+        rands2 = np.ones_like(ky)*R_I[1,i]
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
         # plt.matshow(np.abs(k_matrix))
         # plt.show()
@@ -185,11 +185,11 @@ def conductivity_for_n(E, n, L, eta=eta):
     # print(res)
     return res
 
-def conductivity(L=L, eta=eta): # possibly the slowest function
+def conductivity(L=L, eta=eta, R_I): # possibly the slowest function
     '''
     1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
     '''
-    potential = ft_potential_builder_3(L)
+    potential = ft_potential_builder_3(L, R_I)
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
     ham = hamiltonian(L)
@@ -222,7 +222,8 @@ def main2(L=L):
 def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
     # cond = 0
-    conductivities = np.array([conductivity(l, eta) for l in L])
+    R_I = rng.uniform(high=a,size=(2,N_i))
+    conductivities = np.array([conductivity(l, eta, R_I) for l in L])
     # for i in range(configurations):
         # cond += conductivity(L, eta)
 
