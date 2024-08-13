@@ -38,8 +38,9 @@ def main(save):
     for root, _, fnames in os.walk(directory):
     # for root, _, fnames in os.walk(dirname):
         for fname in fnames:
-            if fname != 'params.txt':
+            if fname != 'params.txt' and 'npy' not in fname:
                 with open(os.path.join(root, fname),'r') as file:
+                    print(root,fname)
                     data = eval(file.read())
                     # print(1)
                     conductivities.append(data)

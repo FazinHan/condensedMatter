@@ -25,8 +25,7 @@ echo "Track-ID: ${runstring[0]}"
 for num in {0..9}
 
 do
-mkdir output_data/run${runstring[*]}
-srun --exclusive --ntasks=1 python main.py ${runstring[*]} &
+srun --exclusive --ntasks=1 mkdir output_data/run${num}${runstring[*]} && python main.py ${num}${runstring[*]} &
 done
 
 wait $!

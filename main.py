@@ -266,6 +266,7 @@ if __name__ == "__main__":
     L = [np.linspace(l_min, l_max,3*5)] * configurations
     
     dirname = os.path.join('output_data','run'+sys.argv[1])
+    
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
     if not os.path.isfile(os.path.join('output_data','run'+sys.argv[1],'params','params.txt')):
