@@ -26,11 +26,8 @@ echo "Track-ID: ${runstring[0]}"
 for num in {0..3}
 
 do
-cd output_data
-python new_version.py
-cd ..
 mkdir output_data/run${runstring[*]}
-srun --exclusive --ntasks=1 module load conda && python main.py ${runstring[*]} &
+srun --exclusive --ntasks=1 python main.py ${runstring[*]} &
 done
 
 wait $!
