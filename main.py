@@ -228,7 +228,7 @@ def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
     assert np.alltrue(conductivities.imag < 1e-21)
 
-    conductivities = conductivities.real.tolist()
+    conductivities = str(conductivities.real.tolist())
 
     # return cond / configurations
     dirname = sys.argv[1]
