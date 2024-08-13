@@ -4,7 +4,7 @@
 #SBATCH --error=output_run1/fermion.%a.%A.err
 #SBATCH --time=4-00:00:00
 #SBATCH --cpus-per-task=1
-#SBATCH --ntasks=20
+#SBATCH --ntasks=10
 #SBATCH -A physics_engg
 #SBATCH --mem-per-cpu=100M
 #SBATCH --array=1-10%10
