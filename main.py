@@ -264,6 +264,8 @@ if __name__ == "__main__":
 
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
+
+    _ = [main(i) for i in L]
     
     dirname = os.path.join('output_data','run'+sys.argv[1])
     
@@ -293,7 +295,6 @@ if __name__ == "__main__":
     # with ProcessPoolExecutor() as exe:
     #     conductivities = list(exe.map(main,L))
 
-    [main(i) for i in L]
     # print(conductivities.shape)
     # cs = CubicSpline(L, conductivities)
     # t1 = time.perf_counter()
