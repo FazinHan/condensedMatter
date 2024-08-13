@@ -270,8 +270,8 @@ if __name__ == "__main__":
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
     if not os.path.isfile(os.path.join('output_data','run'+sys.argv[1],'params','params.txt')):
-        os.mkdir(os.path.join('output_data','params'))
-        with open(os.path.join('output_data','params','params.txt'),'w') as file:
+        os.mkdir(os.path.join('output_data','run'+sys.argv[1],'params'))
+        with open(os.path.join('output_data','run'+sys.argv[1],'params','params.txt'),'w') as file:
             text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\na = {a}'''
             file.write(text)
             print('parameter file written')
