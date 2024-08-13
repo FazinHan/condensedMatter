@@ -123,7 +123,7 @@ def get_k_space(L=L):
     ky = k1y - k2y
     return kx, ky
 
-def ft_potential_builder_3(L=L, R_I=rng.uniform(high=a,size=(2,N_i)))):
+def ft_potential_builder_3(L=L, R_I=rng.uniform(high=a,size=(2,N_i))):
 
     '''
     k_space_size = 51
