@@ -20,15 +20,14 @@ echo "Array task id: $SLURM_ARRAY_TASK_ID"
 
 module load conda
 
-
 runstring=(`echo ${SLURM_ARRAY_TASK_ID:-1}`)
 echo "Track-ID: ${runstring[0]}"
 
 for num in {0..3}
 
 do
-dirname=(`python mkdir.py`)
-srun --exclusive --ntasks=1 python main.py ${dirname} ${runstring[*]} &
+mkdir output_data/run${runstring[*]}
+srun --exclusive --ntasks=1 python main.py "output_data/run${runstring[*]}" &
 done
 
 wait $!
