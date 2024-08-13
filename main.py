@@ -228,14 +228,18 @@ def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
     assert np.alltrue(conductivities.imag < 1e-21)
 
-    conductivities = np.array(conductivities.real, dtype=np.float64)
+    conductivities = conductivities.real.tolist()
 
     # return cond / configurations
     dirname = sys.argv[1]
-    fname = determine_next_filename(fname='output',folder=dirname, filetype='npy')
-    np.save(fname, conductivities)
+    fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
+    write_file(fname, conductivities)
     print('conductivities computed and stored')
     # return conductivities
+
+def write_file(fname, array):
+    with open(fname, 'w') as file:
+        file.write(array)
 
 
 def determine_next_filename(fname='output',filetype='png',folder='graphics',direc=False,exists=False):
