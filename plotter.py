@@ -33,15 +33,16 @@ def main(save):
     dirname = 'output_data'
     version = determine_next_filename('results_version',folder='output_data',direc=True,exists=True)
 
-    directory = dirname
+    directory = version
     
     for root, _, fnames in os.walk(directory):
     # for root, _, fnames in os.walk(dirname):
         for fname in fnames:
-            with open(os.path.join(root, fname),'r') as file:
-                data = eval(file.read())
-                # print(1)
-                conductivities.append(data)
+            if fname != 'params.txt':
+                with open(os.path.join(root, fname),'r') as file:
+                    data = eval(file.read())
+                    # print(1)
+                    conductivities.append(data)
     conductivities = np.array(conductivities)
     conductivities = np.sum(conductivities, axis=0)
     
