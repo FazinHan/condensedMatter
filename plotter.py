@@ -25,6 +25,8 @@ def plotter(L, conductivities, beta, save, name='output', folder=''):
     if save:
         plt.savefig(name)
         print('plotted to',name)
+        os.rename(os.path.join('output_data','params.txt'), os.path.join('output_data',name.split('.')[0]+'_params.txt'))
+        print('parameter file renamed to',name.split('.')[0]+'_params.txt')
     else:
         plt.show()
 
