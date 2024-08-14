@@ -19,8 +19,6 @@ cd ..
 
 python plotter.py save
 
-echo "plot created"
-
 cd output_data
 
 python to_scratch.py

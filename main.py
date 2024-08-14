@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
-l_min, l_max = 1e1,1e4
+l_min, l_max = 1e1,1e5
 
 vf = 1 # 1e6
 h_cut = 1
