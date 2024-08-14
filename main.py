@@ -18,7 +18,7 @@ L = 1e5
 eta = 1e6
 T = 0
 ef = 0
-a = 1
+# a = 1
 
 configurations = 50
 interaction_distance = 3
@@ -123,7 +123,7 @@ def get_k_space(L=L):
     ky = k1y - k2y
     return kx, ky
 
-def ft_potential_builder_3(L=L, R_I=rng.uniform(high=a,size=(2,N_i))):
+def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
 
     '''
     k_space_size = 51
@@ -185,7 +185,7 @@ def conductivity_for_n(E, n, L, eta=eta):
     # print(res)
     return res
 
-def conductivity(L=L, eta=eta, R_I=rng.uniform(high=a,size=(2,N_i))): # possibly the slowest function
+def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))): # possibly the slowest function
     '''
     1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
     '''
@@ -222,8 +222,7 @@ def main2(L=L):
 def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
     # cond = 0
-    R_I = rng.uniform(high=a,size=(2,N_i))
-    conductivities = np.array([conductivity(l, eta, R_I) for l in L])
+    conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i))) for l in L])
     # for i in range(configurations):
         # cond += conductivity(L, eta)
 
@@ -275,7 +274,7 @@ if __name__ == "__main__":
     if not os.path.isfile(os.path.join('output_data','params','params.txt')):
         os.mkdir(os.path.join('output_data','params'))
         with open(os.path.join('output_data','params','params.txt'),'w') as file:
-            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\na = {a}'''
+            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}'''#\na = {a}'''
             file.write(text)
             print('parameter file written')
     
