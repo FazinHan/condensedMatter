@@ -27,7 +27,7 @@ python to_scratch.py
 
 echo "data sent to scratch"
 
-eval "$(ssh-agent -s)" &&  ssh-add ~/.ssh/id_ed25519 && git add . && git commit -m "update" && git push
+eval "$(ssh-agent -s)" &&  ssh-add ~/.ssh/id_ed25519 && git add . && git commit -m "calculation" && git push
 
 echo "========= Job finished at `date` =========="
 
