@@ -4,6 +4,9 @@
 #SBATCH --job-name=clean.up
 #SBATCH --output=output_run1/cleanup.out
 
+module load conda
+module load git_2.41
+
 echo "========= Job started  at `date` on `hostname -s` =========="
 
 cd output_data
