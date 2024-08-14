@@ -1,0 +1,11 @@
+l_min, l_max = 10.0, 10000.0
+vf = 1
+h_cut = 1
+u = 1
+l0 = 0.3333333333333333
+N_i = 10
+eta = 1000000.0
+T = 0
+ef = 0
+configurations = 50
+k_space_size = 51
