@@ -12,7 +12,7 @@ def plotter(L, conductivities, beta, save, name='output', folder=''):
     axs[1].plot(L, conductivities,'.')
     axs[0].plot(conductivities, beta,'.')
     # axs[0].set_xlabel('$\\eta$')
-    axs[1].set_xlabel('L')
+    axs[1].set_xlabel('$\\eta$')
     axs[1].set_ylabel('g')
     axs[0].set_xlabel('g')
     axs[0].set_ylabel('$\\beta$')
@@ -56,8 +56,6 @@ def main(save):
     # print(L.shape)
 
     # print(L.shape)
-    L = np.log(L)
-    conductivities = np.log(conductivities)
     cs = CubicSpline(L, conductivities)
     g = cs(L)
     beta = cs(L, 1)
