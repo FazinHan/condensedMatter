@@ -35,12 +35,12 @@ def main(save):
     dirname = 'output_data'
     version = determine_next_filename('results_version',folder='output_data',direc=True,exists=True)
 
-    directory = version
+    directory = dirname
     
     for root, _, fnames in os.walk(directory):
     # for root, _, fnames in os.walk(dirname):
         for fname in fnames:
-            if fname != 'params.txt' and 'txt' in fname:# and 'results_version' not in root:
+            if 'params.txt' not in fname and 'txt' in fname:# and 'results_version' not in root:
                 with open(os.path.join(root, fname),'r') as file:
                     # print(root,fname)
                     data = eval(file.read())
