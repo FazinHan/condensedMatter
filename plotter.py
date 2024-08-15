@@ -32,7 +32,7 @@ def plotter(L, conductivities, beta, save, name='output', folder=''):
 
 def main(save):
     conductivities = []
-    dirname = 'output_data/results_version1.~12~'
+    dirname = 'output_data'
     version = determine_next_filename('results_version',folder='output_data',direc=True,exists=True)
 
     directory = dirname
@@ -56,12 +56,9 @@ def main(save):
     # print(L.shape)
 
     # print(L.shape)
-    L = np.log(L)
-    conductivities = np.log(conductivities)
-    cs = CubicSpline(L, conductivities)
-    g = cs(L)
-    beta = cs(L, 1)
-    plotter(L[:-1], np.abs(g)[:-1], np.abs(beta)[:-1], save, folder=dirname)
+    cs = CubicSpline(np.log(L), np.log(conductivities))
+    beta = cs(np.log(L), 1)
+    plotter(L, conductvities, beta, save, folder=dirname)
     # plotter(L, np.abs(g), np.abs(beta), name!='output', name)
 
 if __name__=="__main__":

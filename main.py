@@ -23,7 +23,6 @@ ef = 0
 configurations = 50
 interaction_distance = 3
 k_space_size = 51
-# k_space_size = 20
 kernel_size = k_space_size
 kernel_spread = 3
 # eta = 1e5 * vf * 2 * np.pi / L
@@ -73,14 +72,10 @@ def ft_potential_builder_2(L, N_i, k_space_size, kernel_size, function):
     rng = np.random.Generator(np.random.PCG64())
     indices = rng.integers(0, k_space_size, size=(N_i, 2))
     r = np.zeros((k_space_size, k_space_size))
-    # r[indices[:,0],indices[:,1]] = 1
     r[indices[:,0],indices[:,1]] = 1
     
-    # print(indices)
     result = fft2(r) * kernel
 
-    # print(result.shape)
-    
     return result
 
 def ft_potential_builder_2_5(L=L):
@@ -90,9 +85,7 @@ def ft_potential_builder_2_5(L=L):
     
     k_diag = np.diag(k_vec)
     kxx, kyy = np.meshgrid(k_vec, k_vec)
-    # k2 = (kx**2 + ky**2)**.5
     k_matrix = np.zeros_like(np.kron(kxx,kyy), dtype=np.complex128)
-    # return kx - ky
 
     for kx in range(k_matrix.shape[0]):
         for ky in range(k_matrix.shape[1]):
@@ -100,8 +93,6 @@ def ft_potential_builder_2_5(L=L):
                 rnd_num1 = rng.standard_normal()
                 rnd_num2 = rng.standard_normal()
                 k_matrix[kx,ky] += np.exp(1j * (kxx[kx,ky] - kyy[kx,ky]) * rnd_num) * function( (kxx[kx,ky]**2 + kyy[kx,ky]**2)**.5 )
-                # plt.matshow(np.abs(k_matrix))
-                # plt.show()
 
     return np.kron(np.eye(2),k_matrix)
 
@@ -114,7 +105,6 @@ def get_k_space(L=L):
     k_vec = np.linspace(-lamda, lamda, int(k_space_size**.5))
     
     cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
-    # cartesian_product = cartesian_product[np.where(cartesian_product[:,0]**2+cartesian_product[:,1]**2 <= lamda**2)]
     
     k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0])
     k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1])
@@ -138,8 +128,6 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i)))
         rands1 = np.ones_like(kx)*R_I[0,i]
         rands2 = np.ones_like(ky)*R_I[1,i]
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
-        # plt.matshow(np.abs(k_matrix))
-        # plt.show()
 
     return np.kron(np.eye(2),k_matrix)
 
@@ -213,7 +201,6 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
 def main2(L=L):
 
     cond = 0
-    # conductivities = np.array([conductivity(l, eta) for l in L])
     for i in range(configurations):
         cond += conductivity(L, eta)
     
@@ -221,34 +208,21 @@ def main2(L=L):
 
 def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
-    # cond = 0
     conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i))) for l in L])
-    # for i in range(configurations):
-        # cond += conductivity(L, eta)
-
-    # assert np.alltrue(conductivities.imag < 1e-21)
 
     conductivities = str(conductivities.real.tolist())
 
-    # return cond / configurations
     dirname = os.path.join('output_data','run'+sys.argv[1])
     fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
     write_file(fname, conductivities)
     print('conductivities computed and stored')
-    # return conductivities
 
 def main_eta(eta=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
-    # cond = 0
     conductivities = np.array([conductivity(L, e, rng.uniform(low=-l/2,high=l/2,size=(2,N_i))) for e in eta])
-    # for i in range(configurations):
-        # cond += conductivity(L, eta)
-
-    # assert np.alltrue(conductivities.imag < 1e-21)
 
     conductivities = str(conductivities.real.tolist())
 
-    # return cond / configurations
     dirname = os.path.join('output_data','run'+sys.argv[1])
     fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
     write_file(fname, conductivities)
@@ -294,79 +268,14 @@ if __name__ == "__main__":
             file.write(text)
             print('parameter file written')
     
-    # print(L)
-    # ones = np.ones(configurations)
-    # l, _ = np.meshgrid(L, ones)
-
-    # try:
-    #     for i in L:
-    #         os.remove(os.path.join('')
-
-    # t0 = time.perf_counter()
-
-    # with ProcessPoolExecutor(40) as exe:
-        # conductivities = list(exe.map(main, l))
-
-
-    # with ProcessPoolExecutor() as exe:
-    #     conductivities = list(exe.map(main,L))
-
-    # print(conductivities.shape)
-    # cs = CubicSpline(L, conductivities)
-    # t1 = time.perf_counter()
-    # print('%.2f s'%(t1-t0))
-    # try:
-    #     name = sys.argv[1]
-    # except IndexError:
-    #     name = 'data'
-
-    # name = determine_next_filename(name,'npz','output data')
-    # with open(name,'wb') as file:
-    #     np.savez(file, L=L, eta=eta, conductivities=conductivities, beta=cs(L,1))
-    #     print('data written to',name)
-
-    # try:
-    #     name = sys.argv[2]
-    # except IndexError:
-    #     name = 'output'
-
-    # import plotter; plotter.main(name)
-
-    
-    # np.save(fname, conductivities)
-    # print(np.array(conductivities))
-    # print(f"data written to {fname}")
-
-    # plotter(L, conductivities, beta)
-    # g = cs(L)
-
+   
 if __name__=="__main__1":
-    # potential3 = hamiltonian()
 
     t0 = time.perf_counter()
     potential3 = ft_potential_builder_3()
-    # t1 = time.perf_counter()
-    # potential4 = conductivity()
     t2 = time.perf_counter()
     
-    # print(potential3)
-    # print(potential4)
-    # print(f'{np.round(t1-t0,5)}s using jit')
     print(f'{np.round(t2-t0,5)}s')
-
-    # fig, axs = plt.subplots(2,1,sharex=True)
-    
-    # axs[0].matshow(potential3.real, cmap='RdBu_r')
-    # # axs[0,1].matshow(np.abs(potential3), cmap='RdBu_r')
-    # pcm = axs[1].matshow(potential3.imag, cmap='RdBu_r')
-    # axs[0].set_ylabel('real part')
-    # axs[1].set_ylabel('imaginary part')
-    # for ax in axs:   
-    #     ax.axes.get_xaxis().set_ticks([])
-    #     ax.axes.get_yaxis().set_ticks([])
-    # fig.colorbar(pcm, ax=axs, shrink=0.6)
-    # plt.colorbar(loc='bottom')
-    # print(np.allclose(potential3.real, np.abs(potential3)))
 
     plt.pcolormesh(np.flip(np.abs(potential3),0))#, cmap='RdBu_r')
     plt.xticks([])
