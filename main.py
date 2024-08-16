@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
-l_min, l_max = 1e1,1e6
+l_min, l_max = 10,40
 
 vf = 1 # 1e6
 h_cut = 1
 u = 1
 l0 = l_min / 30
-N_i = 20
-L = 1e5
+N_i = 1
+L = 10
 # l0 = L/30
 eta = 1e6
 T = 0
@@ -21,7 +21,7 @@ ef = 0
 # a = 1
 
 configurations = 50
-k_space_size = 51
+k_space_size = 41
 
 interaction_distance = 3
 
@@ -47,8 +47,8 @@ def get_k_space(L=L):
     k_space_size = 51
     161 μs ± 5.12 μs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
     '''
-    lamda = 20*2*np.pi/L
-    k_vec = np.linspace(-lamda, lamda, int(k_space_size**.5))
+    lamda = 20*np.pi/L
+    k_vec = np.linspace(-lamda, lamda, k_space_size)
     
     cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
     
@@ -59,7 +59,7 @@ def get_k_space(L=L):
     ky = k1y - k2y
     return kx, ky
 
-def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
+def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
 
     '''
     k_space_size = 51
@@ -70,12 +70,12 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i)))
     
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
-    for i in range(N_i):
+    for i in range(N_i*L**2):
         rands1 = np.ones_like(kx)*R_I[0,i]
         rands2 = np.ones_like(ky)*R_I[1,i]
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
 
-    return np.kron(np.eye(2),k_matrix)
+    return np.kron(np.eye(2),k_matrix)/L**2
 
 def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
     if T != 0:
@@ -119,7 +119,7 @@ def conductivity_for_n(E, n, L, eta=eta):
     # print(res)
     return res
 
-def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))): # possibly the slowest function
+def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
     '''
     1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
     '''
@@ -145,7 +145,7 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
 
 def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
-    conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i))) for l in L])
+    conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*l**2))) for l in L])
 
     conductivities = str(conductivities.real.tolist())
 
@@ -176,7 +176,7 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
             num -= 1
     return os.path.join(folder,filename(num))
 
-if __name__ == "__main__":
+if __name__ == "__main_1_":
 
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
@@ -194,7 +194,7 @@ if __name__ == "__main__":
             print('parameter file written')
     
    
-if __name__=="__main__1":
+if __name__=="__main__":
 
     t0 = time.perf_counter()
     potential3 = ft_potential_builder_3()
