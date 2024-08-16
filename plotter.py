@@ -26,7 +26,7 @@ def plotter(L, conductivities, beta, save, folder=''):
 def main(save):
     conductivities = []
 
-    directory = os.path.join('output_data','results_version')
+    directory = os.path.join('output_data','results_version','run'+sys.argv[2])
     
     for root, _, fnames in os.walk(directory):
         for fname in fnames:
@@ -37,7 +37,7 @@ def main(save):
     conductivities = np.array(conductivities)
     conductivities = np.sum(conductivities, axis=0)
     
-    fname = os.path.join(directory,'run110','length1.npy')
+    fname = os.path.join(directory,'length1.npy')
     with open(fname,'rb') as file:
         L = np.load(file)
 

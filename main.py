@@ -177,7 +177,7 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
             num -= 1
     return os.path.join(folder,filename(num))
 
-if __name__ == "__main_1_":
+if __name__ == "__main__":
 
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
@@ -195,7 +195,7 @@ if __name__ == "__main_1_":
             print('parameter file written')
     
    
-if __name__=="__main__":
+if __name__=="__main__1":
 
     t0 = time.perf_counter()
     potential3 = ft_potential_builder_3()
