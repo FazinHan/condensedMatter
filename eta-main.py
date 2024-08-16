@@ -3,7 +3,7 @@ from scipy import stats
 from scipy.fft import fft2, rfft2
 from scipy.signal import fftconvolve
 import matplotlib.pyplot as plt
-from concurrent.futures import ProcessPoolExecutor
+from scipy.interpolate import CubicSpline
 import os, warnings, sys, time
 
 eta_min, eta_max = 1e1,1e25
@@ -12,7 +12,7 @@ vf = 1 # 1e6
 h_cut = 1
 u = 1
 N_i = 20
-L = 1e5
+L = 1e2
 l0 = L/30
 T = 0
 ef = 0
@@ -58,25 +58,6 @@ def get_k_space(L=L):
     kx = k1x - k2x
     ky = k1y - k2y
     return kx, ky
-
-def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
-
-    '''
-    k_space_size = 51
-    >>> 4.14 ms ± 327 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
-    '''
-
-    kx, ky = get_k_space(L)
-    
-    k_matrix = np.zeros_like(kx, dtype=np.complex128)
-    
-    for i in range(N_i):
-        rands1 = np.ones_like(kx)*R_I[0,i]
-        rands2 = np.ones_like(ky)*R_I[1,i]
-        k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
-
-    return np.kron(np.eye(2),k_matrix)
-
 def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
     if T != 0:
         return 1/(1+np.exp((x-ef)/T))
@@ -100,11 +81,11 @@ def hamiltonian(L=L):
     '''
     kx, ky = get_k_space(L)
     H0 = vf * (np.kron(sx, kx) + np.kron(sy, ky))
-    V_q = ft_potential_builder_3(L)
-    return H0 + V_q
+    # V_q = ft_potential_builder_3(L)
+    return H0 #+ V_q
 
 
-def conductivity_for_n(E, n, L, eta=eta):
+def conductivity_for_n(E, n, L, eta):
     '''
     131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each) -> k_space_size = 2000
     '''
@@ -119,11 +100,10 @@ def conductivity_for_n(E, n, L, eta=eta):
     # print(res)
     return res
 
-def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))): # possibly the slowest function
+def conductivity(eta, L=L):#, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))): # possibly the slowest function
     '''
     1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
     '''
-    potential = ft_potential_builder_3(L, R_I)
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
     ham = hamiltonian(L)
@@ -146,7 +126,7 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
 
 def main_eta(eta=np.linspace(eta_min,eta_max,15)): # faster locally (single node)
 
-    conductivities = np.array([conductivity(L, e, rng.uniform(low=-l/2,high=l/2,size=(2,N_i))) for e in eta])
+    conductivities = np.array([conductivity(e, L) for e in eta])
 
     return conductivities
 
@@ -193,46 +173,27 @@ def plotter(L, conductivities, beta, save, name='output', folder=''):
     name = determine_next_filename('eta-plot', folder=folder, filetype='png')#fname='eta_variance')
     if save:
         plt.savefig(name)
-        print('plotted to',name)
-        os.rename(os.path.join('output_data','eta-params.txt'), name.split('.')[0]+'_eta-params.txt')
-        print('parameter file renamed to',name.split('.')[0]+'_eta-params.txt')
     else:
         plt.show()
+    return name
 
 if __name__ == "__main__":
     
     
     eta = np.linspace(eta_min, eta_max,3*5)
 
-    conductivities = main(eta)
+    conductivities = main_eta(eta)
     
     dirname = 'output_data'
     
-    fname = determine_next_filename(fname='eta-params',folder=dirname, filetype='txt')
-    if not os.path.isfile(fname):
-        with open(fname,'w') as file:
-            text = f'''eta_min, eta_max = {eta_min}, {eta_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\nL = {L}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\npotential = {function}'''#\na = {a}'''
-            file.write(text)
-            print('parameter file written')
-
     cs = CubicSpline(eta, conductivities)
     g = cs(eta)
     beta = cs(eta, 1)
-    plotter(eta, g, beta, save, folder=dirname)
-    
-   
-if __name__=="__main__1":
+    name = plotter(eta, g, beta, 1, folder=dirname)
 
-    t0 = time.perf_counter()
-    potential3 = ft_potential_builder_3()
-    t2 = time.perf_counter()
-    
-    print(f'{np.round(t2-t0,5)}s')
+    fname = name.strip('.png')+'_params.txt'
 
-    plt.pcolormesh(np.flip(np.abs(potential3),0))#, cmap='RdBu_r')
-    plt.xticks([])
-    plt.yticks([])
-    plt.colorbar(shrink=0.6)
-    plt.tight_layout()
-    plt.savefig(os.path.join('graphics','full_hamiltonian.png'))
-    # plt.show()
+    with open(fname,'w') as file:
+        text = f'''eta_min, eta_max = {eta_min}, {eta_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\nL = {L}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\npotential = {function}'''#\na = {a}'''
+        file.write(text)
+        print('parameter file written')
