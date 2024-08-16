@@ -60,12 +60,10 @@ def get_k_space(L=L):
     return kx, ky
 
 def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
-
     '''
     k_space_size = 51
     >>> 4.14 ms ± 327 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
     '''
-
     kx, ky = get_k_space(L)
     
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
@@ -146,7 +144,7 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
 
 def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
-    conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*l**2))) for l in L])
+    conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2))) for l in L])
 
     conductivities = str(conductivities.real.tolist())
 
@@ -182,23 +180,17 @@ if __name__ == "__main__":
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
 
-    print('debug 1')
-
     _ = [main(i) for i in L]
 
-    print('debug 2')
-    
     dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
     
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
-    print('debug 3')
     if not os.path.isfile(os.path.join('output_data','results_version','params.txt')):
         with open(os.path.join('output_data','results_version','params.txt'),'w') as file:
             text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\nscattering potential = {function}'''#\na = {a}'''
             file.write(text)
             print('parameter file written')
-    print('debug 4')
     
    
 if __name__=="__main__1":
