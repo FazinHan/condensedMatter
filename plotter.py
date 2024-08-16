@@ -28,7 +28,7 @@ def main(save):
     dirname = 'output_data'
     version = determine_next_filename('results_version',folder='output_data',direc=True,exists=True)
 
-    directory = dirname
+    directory = version
     
     for root, _, fnames in os.walk(directory):
         for fname in fnames:
@@ -45,7 +45,7 @@ def main(save):
 
     cs = CubicSpline(np.log(L), np.log(conductivities))
     beta = cs(np.log(L), 1)
-    plotter(L, conductvities, beta, save, folder=dirname)
+    plotter(L, conductivities, beta, save, folder=dirname)
 
 if __name__=="__main__":
     try:
