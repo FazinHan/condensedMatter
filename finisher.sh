@@ -9,23 +9,11 @@ module load git_2.41
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 
-cd output_data
-
-python new_version.py
-
-echo "Data moved into directory"
-
-cd ..
-
 python plotter.py save
 
-cd output_data
-
-python to_scratch.py
+mv --backup=t output_data/results_version $SCRATCH/data-condensedMatter
 
 echo "data sent to scratch"
-
-eval "$(ssh-agent -s)" &&  ssh-add ~/.ssh/id_ed25519 && git add . && git commit -m "calculation" && git push
 
 echo "========= Job finished at `date` =========="
 

@@ -150,7 +150,7 @@ def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
     conductivities = str(conductivities.real.tolist())
 
-    dirname = os.path.join('output_data','run'+sys.argv[1])
+    dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
     fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
     write_file(fname, conductivities)
     print('conductivities computed and stored')
@@ -184,12 +184,12 @@ if __name__ == "__main__":
 
     _ = [main(i) for i in L]
     
-    dirname = os.path.join('output_data','run'+sys.argv[1])
+    dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
     
     fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
     np.save(fname, L[0])
-    if not os.path.isfile(os.path.join('output_data','params.txt')):
-        with open(os.path.join('output_data','params.txt'),'w') as file:
+    if not os.path.isfile(os.path.join('output_data','results_version','params.txt')):
+        with open(os.path.join('output_data','results_version','params.txt'),'w') as file:
             text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\nscattering potential = {function}'''#\na = {a}'''
             file.write(text)
             print('parameter file written')

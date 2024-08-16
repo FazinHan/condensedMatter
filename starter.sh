@@ -24,10 +24,12 @@ echo "Track-ID: ${runstring[0]}"
 
 ntasks=${SLURM_NTASKS:-1}
 
+mkdir output_data/results_version
+
 for num in $(seq 1 $ntasks)
 
 do
-srun --exclusive --ntasks=1 mkdir output_data/run${runstring[*]}${num} && python main.py ${runstring[*]}${num} &
+srun --exclusive --ntasks=1 mkdir output_data/results_version/run${runstring[*]}${num} && python main.py ${runstring[*]}${num} &
 done
 
 wait $!

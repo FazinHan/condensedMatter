@@ -19,8 +19,9 @@ ef = 0
 # a = 1
 
 configurations = 1
-interaction_distance = 3
 k_space_size = 51
+
+interaction_distance = 3
 kernel_size = k_space_size
 kernel_spread = 3
 # eta = 1e5 * vf * 2 * np.pi / L
@@ -184,7 +185,7 @@ if __name__ == "__main__":
 
     conductivities = main_eta(eta)
     
-    dirname = 'output_data'
+    dirname = os.path.join('output_data','eta_plots')
     
     cs = CubicSpline(eta, conductivities)
     g = cs(eta)
