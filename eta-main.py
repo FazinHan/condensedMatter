@@ -6,21 +6,19 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
-l_min, l_max = 1e1,1e6
+eta_min, eta_max = 1e1,1e25
 
 vf = 1 # 1e6
 h_cut = 1
 u = 1
-l0 = l_min / 30
 N_i = 20
 L = 1e5
-# l0 = L/30
-eta = 1e6
+l0 = L/30
 T = 0
 ef = 0
 # a = 1
 
-configurations = 50
+configurations = 1
 interaction_distance = 3
 k_space_size = 51
 kernel_size = k_space_size
@@ -146,16 +144,11 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
-def main_eta(eta=np.linspace(l_min,l_max,15)): # faster locally (single node)
+def main_eta(eta=np.linspace(eta_min,eta_max,15)): # faster locally (single node)
 
     conductivities = np.array([conductivity(L, e, rng.uniform(low=-l/2,high=l/2,size=(2,N_i))) for e in eta])
 
-    conductivities = str(conductivities.real.tolist())
-
-    dirname = os.path.join('output_data','run'+sys.argv[1])
-    fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
-    write_file(fname, conductivities)
-    print('conductivities computed and stored')
+    return conductivities
 
 def write_file(fname, array):
     with open(fname, 'w') as file:
@@ -180,22 +173,52 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
             num -= 1
     return os.path.join(folder,filename(num))
 
+def plotter(L, conductivities, beta, save, name='output', folder=''):
+    fig, axs = plt.subplots(2,1)
+    # t2 = time.perf_counter()
+    # print(f'parallelised: {np.round(t2-t1,3)}s taken')
+    
+    axs[1].plot(L, conductivities,'.')
+    axs[0].plot(conductivities, beta,'.')
+    # axs[0].set_xlabel('$\\eta$')
+    axs[1].set_xlabel('$\\eta$')
+    axs[1].set_ylabel('g')
+    axs[0].set_xlabel('g')
+    axs[0].set_ylabel('$\\beta$')
+    # if name=='output':    
+    #     fig.suptitle(randomness.__name__[:-8])
+    # else:
+    #     fig.suptitle(name)
+    fig.tight_layout()
+    name = determine_next_filename('eta-plot', folder=folder, filetype='png')#fname='eta_variance')
+    if save:
+        plt.savefig(name)
+        print('plotted to',name)
+        os.rename(os.path.join('output_data','eta-params.txt'), name.split('.')[0]+'_eta-params.txt')
+        print('parameter file renamed to',name.split('.')[0]+'_eta-params.txt')
+    else:
+        plt.show()
+
 if __name__ == "__main__":
+    
+    
+    eta = np.linspace(eta_min, eta_max,3*5)
 
+    conductivities = main(eta)
     
-    L = [np.linspace(l_min, l_max,3*5)] * configurations
-
-    _ = [main(i) for i in L]
+    dirname = 'output_data'
     
-    dirname = os.path.join('output_data','run'+sys.argv[1])
-    
-    fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
-    np.save(fname, L[0])
-    if not os.path.isfile(os.path.join('output_data','params.txt')):
-        with open(os.path.join('output_data','params.txt'),'w') as file:
-            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\npotential = {function}'''#\na = {a}'''
+    fname = determine_next_filename(fname='eta-params',folder=dirname, filetype='txt')
+    if not os.path.isfile(fname):
+        with open(fname,'w') as file:
+            text = f'''eta_min, eta_max = {eta_min}, {eta_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\nL = {L}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\npotential = {function}'''#\na = {a}'''
             file.write(text)
             print('parameter file written')
+
+    cs = CubicSpline(eta, conductivities)
+    g = cs(eta)
+    beta = cs(eta, 1)
+    plotter(eta, g, beta, save, folder=dirname)
     
    
 if __name__=="__main__1":

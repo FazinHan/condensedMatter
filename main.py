@@ -190,7 +190,7 @@ if __name__ == "__main__":
     np.save(fname, L[0])
     if not os.path.isfile(os.path.join('output_data','params.txt')):
         with open(os.path.join('output_data','params.txt'),'w') as file:
-            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\npotential = {function}'''#\na = {a}'''
+            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\nscattering potential = {function}'''#\na = {a}'''
             file.write(text)
             print('parameter file written')
     

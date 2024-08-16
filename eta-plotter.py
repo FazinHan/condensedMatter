@@ -4,31 +4,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
 
-def plotter(L, conductivities, beta, save, name='output', folder=''):
-    fig, axs = plt.subplots(2,1)
-    # t2 = time.perf_counter()
-    # print(f'parallelised: {np.round(t2-t1,3)}s taken')
-    
-    axs[1].plot(L, conductivities,'.')
-    axs[0].plot(conductivities, beta,'.')
-    # axs[0].set_xlabel('$\\eta$')
-    axs[1].set_xlabel('$\\eta$')
-    axs[1].set_ylabel('g')
-    axs[0].set_xlabel('g')
-    axs[0].set_ylabel('$\\beta$')
-    # if name=='output':    
-    #     fig.suptitle(randomness.__name__[:-8])
-    # else:
-    #     fig.suptitle(name)
-    fig.tight_layout()
-    name = determine_next_filename('plot', folder=folder, filetype='png')#fname='eta_variance')
-    if save:
-        plt.savefig(name)
-        print('plotted to',name)
-        os.rename(os.path.join('output_data','params.txt'), name.split('.')[0]+'_params.txt')
-        print('parameter file renamed to',name.split('.')[0]+'_params.txt')
-    else:
-        plt.show()
+
 
 def main(save):
     conductivities = []
