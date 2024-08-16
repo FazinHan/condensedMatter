@@ -72,8 +72,8 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L*
     
     for i in range(N_i*L**2):
         rands1 = np.ones_like(kx)*R_I[0,i]
-        rands2 = np.ones_like(ky)*R_I[1,i]
-        k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
+        rands2 = np.ones_like(ky)*R_I[1,i] # may not be needed
+        k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 ) 
 
     return np.kron(np.eye(2),k_matrix)/L**2
 
@@ -94,7 +94,7 @@ def fermi_dirac(x,T=T,ef=ef):
         return .5
     return 1
 
-def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
+def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     '''
     4.4 ms ± 382 μs per loop (mean ± std. dev. of 7 runs, 100 loops each) -> k_space_size = 51
     '''
@@ -126,6 +126,7 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
     ham = hamiltonian(L, R_I)
+    assert np.allclose(ham.T.conj(), ham)
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     # for j in range(len(vals)):
