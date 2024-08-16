@@ -24,8 +24,6 @@ echo "Track-ID: ${runstring[0]}"
 
 ntasks=${SLURM_NTASKS:-1}
 
-mkdir output_data/results_version
-
 for num in $(seq 1 $ntasks)
 
 do

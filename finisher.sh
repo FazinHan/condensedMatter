@@ -15,5 +15,7 @@ mv --backup=t output_data/results_version $SCRATCH/data-condensedMatter
 
 echo "data sent to scratch"
 
+mkdir output_data/results_version
+
 echo "========= Job finished at `date` =========="
 
