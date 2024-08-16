@@ -6,13 +6,13 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 import os, warnings, sys, time
 
-eta_min, eta_max = 1e1,1e25
+eta_min, eta_max = 100,101
 
 vf = 1 # 1e6
 h_cut = 1
 u = 1
 N_i = 20
-L = 1e2
+L = 1e5
 l0 = L/30
 T = 0
 ef = 0

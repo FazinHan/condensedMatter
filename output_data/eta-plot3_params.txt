@@ -1,0 +1,12 @@
+eta_min, eta_max = 100, 101
+vf = 1
+h_cut = 1
+u = 1
+l0 = 3.3333333333333335
+N_i = 20
+L = 100.0
+T = 0
+ef = 0
+configurations = 1
+k_space_size = 51
+potential = <function gaussian_corr at 0x00000200A8D4A160>
