@@ -32,70 +32,18 @@ rng = np.random.default_rng()
 sx = np.array([[0,1],[1,0]])
 sy = 1j * np.array([[0,-1],[1,0]])
 
-
-def gaussian_corr_inverse(x):
-    return np.sqrt(2/l0**2*np.log(u/x))
-
-def thomas_fermi_inverse(x):
-    return u/x-1/l0
-
 def gaussian_corr(q):
     return u * np.exp(-q**2*l0**2/2)
 
 def thomas_fermi(q):
     return u / (q + l0**-1)
 
-def kernel_builder(size, function):
-    axis = np.linspace(-kernel_spread, kernel_spread, size)
-    x, y = np.meshgrid(axis, axis)
-    kernel = np.zeros_like(x)
-    with np.nditer(kernel, flags=['multi_index']) as it:
-        for _ in it:
-            kernel[it.multi_index] += function(x[it.multi_index],y[it.multi_index])
-    return kernel
-
 try:
-    sys.argv[1]
-    randomness = thomas_fermi_inverse
+    sys.argv[2]
     function = thomas_fermi
 except IndexError:
-    randomness = gaussian_corr_inverse
     function = gaussian_corr
     
-def ft_potential_builder(L, N_i, k_space_size, kernel_size, function):
-    r = np.random.uniform(size=(k_space_size,k_space_size))
-    r = function(r)
-    return fft2(r)
-
-def ft_potential_builder_2(L, N_i, k_space_size, kernel_size, function):
-    kernel = kernel_builder(kernel_size, function)
-    rng = np.random.Generator(np.random.PCG64())
-    indices = rng.integers(0, k_space_size, size=(N_i, 2))
-    r = np.zeros((k_space_size, k_space_size))
-    r[indices[:,0],indices[:,1]] = 1
-    
-    result = fft2(r) * kernel
-
-    return result
-
-def ft_potential_builder_2_5(L=L):
-
-    lamda = 20*2*np.pi/L
-    k_vec = np.linspace(-lamda, lamda, k_space_size)
-    
-    k_diag = np.diag(k_vec)
-    kxx, kyy = np.meshgrid(k_vec, k_vec)
-    k_matrix = np.zeros_like(np.kron(kxx,kyy), dtype=np.complex128)
-
-    for kx in range(k_matrix.shape[0]):
-        for ky in range(k_matrix.shape[1]):
-            for i in range(N_i):
-                rnd_num1 = rng.standard_normal()
-                rnd_num2 = rng.standard_normal()
-                k_matrix[kx,ky] += np.exp(1j * (kxx[kx,ky] - kyy[kx,ky]) * rnd_num) * function( (kxx[kx,ky]**2 + kyy[kx,ky]**2)**.5 )
-
-    return np.kron(np.eye(2),k_matrix)
-
 def get_k_space(L=L):
     '''
     k_space_size = 51
@@ -139,7 +87,7 @@ def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
     out[np.where(x == ef)] = .5
     return out
 
-def fermi_dirac(x,T=0,ef=0):
+def fermi_dirac(x,T=T,ef=ef):
     if T != 0:
         return 1/(1+np.exp((x-ef)/T))
     if x>ef:
@@ -198,14 +146,6 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
-def main2(L=L):
-
-    cond = 0
-    for i in range(configurations):
-        cond += conductivity(L, eta)
-    
-    return cond / configurations
-
 def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
     conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i))) for l in L])
@@ -217,21 +157,9 @@ def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
     write_file(fname, conductivities)
     print('conductivities computed and stored')
 
-def main_eta(eta=np.linspace(l_min,l_max,15)): # faster locally (single node)
-
-    conductivities = np.array([conductivity(L, e, rng.uniform(low=-l/2,high=l/2,size=(2,N_i))) for e in eta])
-
-    conductivities = str(conductivities.real.tolist())
-
-    dirname = os.path.join('output_data','run'+sys.argv[1])
-    fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
-    write_file(fname, conductivities)
-    print('conductivities computed and stored')
-
 def write_file(fname, array):
     with open(fname, 'w') as file:
         file.write(array)
-
 
 def determine_next_filename(fname='output',filetype='png',folder='graphics',direc=False,exists=False):
     num = 1
@@ -264,7 +192,7 @@ if __name__ == "__main__":
     np.save(fname, L[0])
     if not os.path.isfile(os.path.join('output_data','params.txt')):
         with open(os.path.join('output_data','params.txt'),'w') as file:
-            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}'''#\na = {a}'''
+            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\npotential = {function}'''#\na = {a}'''
             file.write(text)
             print('parameter file written')
     
