@@ -14,7 +14,7 @@ u = 1
 N_i = 20
 L = 1e5
 l0 = L/30
-T = 0
+T = 1e15
 ef = 0
 # a = 1
 
@@ -59,13 +59,6 @@ def get_k_space(L=L):
     kx = k1x - k2x
     ky = k1y - k2y
     return kx, ky
-def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
-    if T != 0:
-        return 1/(1+np.exp((x-ef)/T))
-    out = np.zeros(x.shape)
-    out[np.where(x < ef)] = 1
-    out[np.where(x == ef)] = .5
-    return out
 
 def fermi_dirac(x,T=T,ef=ef):
     if T != 0:
