@@ -21,11 +21,9 @@ ef = 0
 # a = 1
 
 configurations = 50
-interaction_distance = 3
 k_space_size = 51
-kernel_size = k_space_size
-kernel_spread = 3
-# eta = 1e5 * vf * 2 * np.pi / L
+
+interaction_distance = 3
 
 rng = np.random.default_rng()
 
