@@ -94,13 +94,13 @@ def fermi_dirac(x,T=T,ef=ef):
         return .5
     return 1
 
-def hamiltonian(L=L):
+def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
     '''
     4.4 ms ± 382 μs per loop (mean ± std. dev. of 7 runs, 100 loops each) -> k_space_size = 51
     '''
     kx, ky = get_k_space(L)
     H0 = vf * (np.kron(sx, kx) + np.kron(sy, ky))
-    V_q = ft_potential_builder_3(L)
+    V_q = ft_potential_builder_3(L, R_I)
     return H0 + V_q
 
 
@@ -123,10 +123,9 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
     '''
     1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
     '''
-    potential = ft_potential_builder_3(L, R_I)
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
-    ham = hamiltonian(L)
+    ham = hamiltonian(L, R_I)
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     # for j in range(len(vals)):

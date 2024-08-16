@@ -4,7 +4,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
 
-def plotter(L, conductivities, beta, save, name='output', folder=''):
+def plotter(L, conductivities, beta, save, folder=''):
     fig, axs = plt.subplots(2,1)
     
     axs[1].plot(L, conductivities,'.')
@@ -18,17 +18,15 @@ def plotter(L, conductivities, beta, save, name='output', folder=''):
     if save:
         plt.savefig(name)
         print('plotted to',name)
-        os.rename(os.path.join('output_data','params.txt'), name.strip('.png')+'_params.txt')
+        os.rename(os.path.join(folder,'params.txt'), name.strip('.png')+'_params.txt')
         print('parameter file renamed to',name.strip('.png')+'_params.txt')
     else:
         plt.show()
 
 def main(save):
     conductivities = []
-    dirname = 'output_data'
-    version = determine_next_filename('results_version',folder='output_data',direc=True,exists=True)
 
-    directory = version
+    directory = os.path.join('output_data','results_version')
     
     for root, _, fnames in os.walk(directory):
         for fname in fnames:
@@ -45,7 +43,7 @@ def main(save):
 
     cs = CubicSpline(np.log(L), np.log(conductivities))
     beta = cs(np.log(L), 1)
-    plotter(L, conductivities, beta, save, folder=dirname)
+    plotter(L, conductivities, beta, save, folder=directory)
 
 if __name__=="__main__":
     try:

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 import os, warnings, sys, time
 
-eta_min, eta_max = 100,101
+eta_min, eta_max = 1e5,1e7
 
 vf = 1 # 1e6
 h_cut = 1
@@ -14,7 +14,7 @@ u = 1
 N_i = 20
 L = 1e5
 l0 = L/30
-T = 1e15
+T = 0
 ef = 0
 # a = 1
 
@@ -60,6 +60,24 @@ def get_k_space(L=L):
     ky = k1y - k2y
     return kx, ky
 
+def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
+
+    '''
+    k_space_size = 51
+    >>> 4.14 ms ± 327 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+    '''
+
+    kx, ky = get_k_space(L)
+    
+    k_matrix = np.zeros_like(kx, dtype=np.complex128)
+    
+    for i in range(N_i):
+        rands1 = np.ones_like(kx)*R_I[0,i]
+        rands2 = np.ones_like(ky)*R_I[1,i]
+        k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 )
+
+    return np.kron(np.eye(2),k_matrix)
+
 def fermi_dirac(x,T=T,ef=ef):
     if T != 0:
         return 1/(1+np.exp((x-ef)/T))
@@ -69,14 +87,14 @@ def fermi_dirac(x,T=T,ef=ef):
         return .5
     return 1
 
-def hamiltonian(L=L):
+def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))):
     '''
     4.4 ms ± 382 μs per loop (mean ± std. dev. of 7 runs, 100 loops each) -> k_space_size = 51
     '''
     kx, ky = get_k_space(L)
     H0 = vf * (np.kron(sx, kx) + np.kron(sy, ky))
-    # V_q = ft_potential_builder_3(L)
-    return H0 #+ V_q
+    V_q = ft_potential_builder_3(L, R_I)
+    return H0 + V_q
 
 
 def conductivity_for_n(E, n, L, eta):
@@ -94,13 +112,13 @@ def conductivity_for_n(E, n, L, eta):
     # print(res)
     return res
 
-def conductivity(eta, L=L):#, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))): # possibly the slowest function
+def conductivity(eta, L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))): # possibly the slowest function
     '''
     1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
     '''
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
-    ham = hamiltonian(L)
+    ham = hamiltonian(L, R_I)
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     # for j in range(len(vals)):
@@ -120,7 +138,7 @@ def conductivity(eta, L=L):#, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i))): 
 
 def main_eta(eta=np.linspace(eta_min,eta_max,15)): # faster locally (single node)
 
-    conductivities = np.array([conductivity(e, L) for e in eta])
+    conductivities = np.array([conductivity(e, L, rng.uniform(low=-L/2,high=L/2,size=(2,N_i))) for e in eta])
 
     return conductivities
 
