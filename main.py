@@ -58,16 +58,16 @@ def get_k_space(L=L):
     kx = k1x - k2x
     ky = k1y - k2y
 
-    k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
+    # k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
     
-    return kx, ky, k1x, k1y
+    return kx, ky, np.diag(k_vec)
 
 def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     '''
     k_space_size = 51
     >>> 4.14 ms ± 327 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
     '''
-    kx, ky, _, _ = get_k_space(L)
+    kx, ky, _ = get_k_space(L)
     
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
@@ -97,15 +97,12 @@ def fermi_dirac(x,T=T,ef=ef):
 
 def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     
-    kx, ky, _, _ = get_k_space(L)
-    
-    sdotk = np.kron(sx, kx)+np.kron(sy,ky)
+    _, _, k = get_k_space(L)
+
+    sdotk = np.kron(sx, k)+np.kron(sy, k)
     H0 = vf * sdotk
-    print(H0.shape)
-    # print(H0.shape)
-    # V_q = ft_potential_builder_3(L, R_I)
-    return H0 # + V_q
-    # return V_q
+    V_q = ft_potential_builder_3(L, R_I)
+    return H0 + V_q
 
 
 def conductivity_for_n(E, n, L, eta=eta):
@@ -131,9 +128,6 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
     g_singular = 0
     ham = hamiltonian(L, R_I)
     assert np.allclose(ham.T.conj(), ham)
-    
-    print('passed');exit()
-    
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     # for j in range(len(vals)):
