@@ -48,17 +48,17 @@ def get_k_space(L=L):
     161 μs ± 5.12 μs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
     '''
     lamda = 20*np.pi/L
-    k_vec = np.linspace(-lamda, lamda, k_space_size)
+    k_vec = np.linspace(-lamda, lamda, k_space_size) # N
     
     cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
     
-    k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0])
+    k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0]) # N^2
     k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1])
 
     kx = k1x - k2x
     ky = k1y - k2y
 
-    k1x, k1y = np.meshgrid(k_vec, k_vec)
+    k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
     
     return kx, ky, k1x, k1y
 
@@ -96,15 +96,16 @@ def fermi_dirac(x,T=T,ef=ef):
     return 1
 
 def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
-    '''
-    4.4 ms ± 382 μs per loop (mean ± std. dev. of 7 runs, 100 loops each) -> k_space_size = 51
-    '''
-    _, _, kx, ky = get_k_space(L)
+    
+    kx, ky, _, _ = get_k_space(L)
+    
     sdotk = np.kron(sx, kx)+np.kron(sy,ky)
-    H0 = vf * np.kron(np.eye(kx.shape[0],dtype=int),sdotk)
+    H0 = vf * sdotk
     print(H0.shape)
+    # print(H0.shape)
     # V_q = ft_potential_builder_3(L, R_I)
-    return H0 #+ V_q
+    return H0 # + V_q
+    # return V_q
 
 
 def conductivity_for_n(E, n, L, eta=eta):
@@ -226,14 +227,17 @@ if __name__=="__main__1":
     plt.savefig(os.path.join('graphics','full_hamiltonian.png'))
     # plt.show()
 
-if __name__=="__main_1_":
-    k1x, k1y, k2x, k2y = get_k_space(10)
-    k = np.kron(sy,k2y)
-    print(np.allclose(k, k.conj().T))
+if __name__=="__main__1":
+    # k1x, k1y, k2x, k2y = get_k_space(10)
+    # k = np.kron(sy,k2y)
+    # print(np.allclose(k, k.conj().T))
+    ham = hamiltonian()
+    assert np.allclose(ham, ham.T.conj())
     plt.subplot(1,2,1)
     # plt.pcolormesh(np.kron(sy, ky).imag)
-    plt.pcolormesh(k.imag)
+    plt.pcolormesh(ham.imag)
     plt.subplot(1,2,2)
-    plt.pcolormesh(k.imag.T)
+    # plt.pcolormesh(k.imag.T)
+    plt.pcolormesh(ham.real)
     # plt.pcolormesh(np.kron(sy, ky).imag.T)
     plt.show()
