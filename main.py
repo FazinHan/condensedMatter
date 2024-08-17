@@ -60,7 +60,7 @@ def get_k_space(L=L):
 
     # k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
     
-    return kx, ky, np.diag(k_vec)
+    return kx, ky, cartesian_product[:,0], cartesian_product[:,1]
 
 def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     '''
@@ -97,9 +97,9 @@ def fermi_dirac(x,T=T,ef=ef):
 
 def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     
-    _, _, k = get_k_space(L)
+    _, _, kx, ky = get_k_space(L)
 
-    sdotk = np.kron(sx, k)+np.kron(sy, k)
+    sdotk = np.kron(sx, kx)+np.kron(sy, ky)
     H0 = vf * sdotk
     V_q = ft_potential_builder_3(L, R_I)
     return H0 + V_q
