@@ -21,7 +21,7 @@ ef = 0
 # a = 1
 
 configurations = 50
-k_space_size = 41
+k_space_size = 45
 
 interaction_distance = 3
 
@@ -57,14 +57,17 @@ def get_k_space(L=L):
 
     kx = k1x - k2x
     ky = k1y - k2y
-    return kx, ky
+
+    k1x, k1y = np.meshgrid(k_vec, k_vec)
+    
+    return kx, ky, k1x, k1y
 
 def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     '''
     k_space_size = 51
     >>> 4.14 ms ± 327 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
     '''
-    kx, ky = get_k_space(L)
+    kx, ky, _, _ = get_k_space(L)
     
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
@@ -73,7 +76,7 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L*
         rands2 = np.ones_like(ky)*R_I[1,i] # may not be needed
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 ) 
 
-    return np.kron(np.eye(2),k_matrix)/L**2
+    return np.kron(k_matrix,np.eye(2))/L**2
 
 def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
     if T != 0:
@@ -96,10 +99,12 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     '''
     4.4 ms ± 382 μs per loop (mean ± std. dev. of 7 runs, 100 loops each) -> k_space_size = 51
     '''
-    kx, ky = get_k_space(L)
-    H0 = vf * (np.kron(sx, kx) + np.kron(sy, ky))
-    V_q = ft_potential_builder_3(L, R_I)
-    return H0 + V_q
+    _, _, kx, ky = get_k_space(L)
+    sdotk = np.kron(sx, kx)+np.kron(sy,ky)
+    H0 = vf * np.kron(np.eye(kx.shape[0],dtype=int),sdotk)
+    print(H0.shape)
+    # V_q = ft_potential_builder_3(L, R_I)
+    return H0 #+ V_q
 
 
 def conductivity_for_n(E, n, L, eta=eta):
@@ -107,8 +112,8 @@ def conductivity_for_n(E, n, L, eta=eta):
     131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each) -> k_space_size = 2000
     '''
     eta = vf * 2 * np.pi / L
-    kx, ky = get_k_space(L)
-    sxx = np.kron(sx, np.eye(kx.shape[0]))
+    _, _, kx, ky = get_k_space(L)
+    sxx = np.kron(np.eye(kx.shape[0]), sx)
     fd_diff = fermi_dirac(E[0]) - fermi_dirac(E[1])
     diff = E[0] - E[1]
     if diff == 0:
@@ -125,6 +130,9 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
     g_singular = 0
     ham = hamiltonian(L, R_I)
     assert np.allclose(ham.T.conj(), ham)
+    
+    print('passed');exit()
+    
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     # for j in range(len(vals)):
@@ -144,14 +152,18 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
 
 def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
+    print('main function run')
+
     conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2))) for l in L])
+
+    print('conductivities computed')
 
     conductivities = str(conductivities.real.tolist())
 
     dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
     fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
     write_file(fname, conductivities)
-    print('conductivities computed and stored')
+    print('conductivities stored')
 
 def write_file(fname, array):
     with open(fname, 'w') as file:
@@ -213,3 +225,15 @@ if __name__=="__main__1":
     plt.tight_layout()
     plt.savefig(os.path.join('graphics','full_hamiltonian.png'))
     # plt.show()
+
+if __name__=="__main_1_":
+    k1x, k1y, k2x, k2y = get_k_space(10)
+    k = np.kron(sy,k2y)
+    print(np.allclose(k, k.conj().T))
+    plt.subplot(1,2,1)
+    # plt.pcolormesh(np.kron(sy, ky).imag)
+    plt.pcolormesh(k.imag)
+    plt.subplot(1,2,2)
+    plt.pcolormesh(k.imag.T)
+    # plt.pcolormesh(np.kron(sy, ky).imag.T)
+    plt.show()
