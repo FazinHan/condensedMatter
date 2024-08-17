@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=tilted.fermion
-#SBATCH --output=output_run1/fermion.%a.%A.out
-#SBATCH --error=output_run1/fermion.%a.%A.err
+#SBATCH --output=output_run1/fermion.%a.out
+#SBATCH --error=output_run1/fermion.%a.err
 #SBATCH --time=4-00:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=40
