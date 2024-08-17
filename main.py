@@ -68,7 +68,7 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L*
     
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
-    for i in range(N_i*L**2):
+    for i in range(N_i*int(L)**2):
         rands1 = np.ones_like(kx)*R_I[0,i]
         rands2 = np.ones_like(ky)*R_I[1,i] # may not be needed
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 ) 
@@ -198,8 +198,13 @@ if __name__=="__main__1":
     t0 = time.perf_counter()
     potential3 = ft_potential_builder_3()
     t2 = time.perf_counter()
+
+    print('wrong block')
+    assert 0
     
     print(f'{np.round(t2-t0,5)}s')
+
+
 
     plt.pcolormesh(np.flip(np.abs(potential3),0))#, cmap='RdBu_r')
     plt.xticks([])
