@@ -60,14 +60,13 @@ def get_k_space(L=L):
 
     # k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
     
-    return kx, ky, cartesian_product[:,0], cartesian_product[:,1]
+    return kx, ky, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
 
 def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     '''
-    k_space_size = 51
-    >>> 4.14 ms ± 327 μs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+    2min 2s ± 1.97 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
     '''
-    kx, ky, _ = get_k_space(L)
+    kx, ky, _, _ = get_k_space(L)
     
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
@@ -106,9 +105,6 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
 
 
 def conductivity_for_n(E, n, L, eta=eta):
-    '''
-    131 ms ± 2.01 ms per loop (mean ± std. dev. of 7 runs, 10 loops each) -> k_space_size = 2000
-    '''
     eta = vf * 2 * np.pi / L
     _, _, kx, ky = get_k_space(L)
     sxx = np.kron(np.eye(kx.shape[0]), sx)
@@ -182,7 +178,7 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
             num -= 1
     return os.path.join(folder,filename(num))
 
-if __name__ == "__main__":
+if __name__ == "__main__1":
 
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
@@ -221,7 +217,7 @@ if __name__=="__main__1":
     plt.savefig(os.path.join('graphics','full_hamiltonian.png'))
     # plt.show()
 
-if __name__=="__main__1":
+if __name__=="__main__":
     # k1x, k1y, k2x, k2y = get_k_space(10)
     # k = np.kron(sy,k2y)
     # print(np.allclose(k, k.conj().T))

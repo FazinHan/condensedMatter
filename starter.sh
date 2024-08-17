@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=40
 #SBATCH -A physics_engg
-#SBATCH --mem-per-cpu=500M
+#SBATCH --mem-per-cpu=200M
 #SBATCH --array=1-5%5
 
 echo "========= Job started  at `date` on `hostname -s` =========="
