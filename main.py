@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
+'''implement a check on the hamiltoninan: σz(H)σz = −(H) '''
+
 l_min, l_max = 10,40
 
 vf = 1 # 1e6
@@ -123,7 +125,9 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
     ham = hamiltonian(L, R_I)
-    assert np.allclose(ham.T.conj(), ham)
+    if L == l_min:
+        assert np.allclose(ham.T.conj(), ham)
+        # assert 
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     # for j in range(len(vals)):
