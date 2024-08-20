@@ -22,7 +22,7 @@ T = 0
 ef = 0
 # a = 1
 
-configurations = 50
+configurations = 1
 k_space_size = 45
 
 interaction_distance = 3
