@@ -9,6 +9,7 @@ import os, warnings, sys, time
 '''implement a check on the hamiltoninan: σz(H)σz = −(H) '''
 
 l_min, l_max = 10,40
+num_lengths = 7
 
 vf = 1 # 1e6
 h_cut = 1
@@ -170,14 +171,14 @@ def conductivity_vectorised(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size
 
     n_prime_dagger_sx_n_mod2 = np.zeros_like(ham)
     for i in range(vecs.shape[0]):
-        n_dagger, sx_n = np.meshgrid(vecs_conj[0,:],sx_vecs[:,0],sparse=True)
+        n_dagger, sx_n = np.meshgrid(vecs_conj[0,:],sx_vecs[0,:],sparse=True)
         n_prime_dagger_sx_n_mod2 += np.abs(n_dagger * sx_n)**2
 
     kubo_term = factor * fd_diff / diff * n_prime_dagger_sx_n_mod2 / (diff + 1j*eta)
     
     return np.sum(kubo_term)
 
-def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
+def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
 
     print('main function run')
 
@@ -217,7 +218,7 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
 if __name__ == "__main__":
 
     
-    L = [np.linspace(l_min, l_max,3*5)] * configurations
+    L = [np.linspace(l_min, l_max,num_lengths)] * configurations
 
     _ = [main(i) for i in L]
 
