@@ -181,7 +181,7 @@ def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
     print('main function run')
 
-    conductivities = np.array([conductivity(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2))) for l in L])
+    conductivities = np.array([conductivity_vectorised(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2))) for l in L])
 
     print('conductivities computed')
 
@@ -214,7 +214,7 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
             num -= 1
     return os.path.join(folder,filename(num))
 
-if __name__ == "__main__1":
+if __name__ == "__main__":
 
     
     L = [np.linspace(l_min, l_max,3*5)] * configurations
@@ -253,7 +253,7 @@ if __name__=="__main__1":
     plt.savefig(os.path.join('graphics','full_hamiltonian.png'))
     # plt.show()
 
-if __name__=="__main__":
+if __name__=="__main__1":
     # k1x, k1y, k2x, k2y = get_k_space(10)
     # k = np.kron(sy,k2y)
     # print(np.allclose(k, k.conj().T))
