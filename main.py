@@ -97,13 +97,13 @@ def fermi_dirac(x,T=T,ef=ef):
     return 1
 
 def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
-    
+    '''1min 27s ± 3.7 s per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     _, _, kx, ky = get_k_space(L)
 
     sdotk = np.kron(sx, kx)+np.kron(sy, ky)
     H0 = vf * sdotk
-    V_q = ft_potential_builder_3(L, R_I)
-    return H0 + V_q
+    # V_q = ft_potential_builder_3(L, R_I)
+    return H0 #+ V_q
 
 
 def conductivity_for_n(E, n, L, eta=eta):
@@ -144,6 +144,38 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
             n = [vecs[j], vecs[k]]
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
+
+def conductivity_vectorised(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
+    '''
+    1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
+    '''
+    factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
+
+    ham = hamiltonian(L, R_I)
+    if L == l_min:
+        assert np.allclose(ham.T.conj(), ham)
+        # assert 
+    vals, vecs = np.linalg.eigh(ham) 
+    '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
+
+    _, _, kx, ky = get_k_space(L)
+    sxx = np.kron(np.eye(kx.shape[0]), sx)
+
+    sx_vecs = sxx @ vecs # i checked this, matrix multiplication is equivalent to multiplying vector-wise 
+    vecs_conj = vecs.conj()
+
+    E0, E1 = np.meshgrid(vals, vals)
+    fd_diff = fermi_dirac_ondist(E0) - fermi_dirac_ondist(E1)
+    diff = E0-E1
+
+    n_prime_dagger_sx_n_mod2 = np.zeros_like(ham)
+    for i in range(vecs.shape[0]):
+        n_dagger, sx_n = np.meshgrid(vecs_conj[0,:],sx_vecs[:,0],sparse=True)
+        n_prime_dagger_sx_n_mod2 += np.abs(n_dagger * sx_n)**2
+
+    kubo_term = factor * fd_diff / diff * n_prime_dagger_sx_n_mod2 / (diff + 1j*eta)
+    
+    return np.sum(kubo_term)
 
 def main(L=np.linspace(l_min,l_max,15)): # faster locally (single node)
 
