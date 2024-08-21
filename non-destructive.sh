@@ -7,14 +7,18 @@
 #SBATCH --ntasks=40
 
 module load conda
+module load intel/2018.0.1.163
+module unload gnu8/8.3.0
+source /opt/ohpc/pub/intel2018/compilers_and_libraries_2018.1.163/linux/mkl/bin/mklvars.sh intel64
+
+export I_MPI_FALLBACK=disable
+export I_MPI_FABRICS=shm:tmi
+export I_MPI_DEBUG=9
+export OMP_NUM_THREADS=40
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 
-for num in $(seq 1 $ntasks)
-
-do
-srun --exclusive --ntasks=1 python plotter.py save ${runstring[*]}${num}
-done
+mpirun -np 40 python plotter.py $OMPI_COMM_WORLD_RANK
 
 echo "========= Job finished at `date` =========="
 
