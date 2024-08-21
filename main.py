@@ -9,7 +9,7 @@ import os, warnings, sys, time
 '''implement a check on the hamiltoninan: σz(H)σz = −(H) '''
 
 l_min, l_max = 10,40
-num_lengths = 7
+num_lengths = 4
 
 vf = 1 # 1e6
 h_cut = 1
