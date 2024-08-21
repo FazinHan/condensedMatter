@@ -9,7 +9,7 @@ def main():
 
     directory = os.path.join('output_data','results_version','run'+sys.argv[1])
 
-    lfname = os.path.join('output_data','results_version','length.npy')
+    lfname = os.path.join('output_data','results_version','run'+sys.argv[1],'length1.npy')
     
     for root, _, fnames in os.walk(directory):
         for fname in fnames:
