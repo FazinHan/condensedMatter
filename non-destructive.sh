@@ -18,7 +18,7 @@ export OMP_NUM_THREADS=40
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 
-mpirun -np 40 python plotter.py $OMPI_COMM_WORLD_RANK
+mpirun -np 40 python plotter.py save $OMPI_COMM_WORLD_RANK
 
 echo "========= Job finished at `date` =========="
 
