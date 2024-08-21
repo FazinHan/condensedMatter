@@ -1,8 +1,27 @@
 #!/bin/bash
-
 #SBATCH -A physics_engg
-#SBATCH --output=out_timer.out
+#SBATCH --output=output_run1/timer.out
 
 module load conda
 
-python -c "import timeit; from main import conductivity_vectorised; timer = timeit.default_timer; start = timer(); conductivity_vectorised(); print(timer() - start, 's')"
+echo "===========FULL SYSTEM SIZE TIMER=========="
+
+echo "Timing get_k_space..."
+python -m timeit "from main import *" "get_k_space()"
+echo ""
+
+echo "Timing ft_potential_builder_3..."
+python -m timeit "from main import *" "ft_potential_builder_3()"
+echo ""
+
+echo "Timing hamiltonian..."
+python -m timeit "from main import *" "hamiltonian()"
+echo ""
+
+echo "Timing conductivity_vectorised..."
+python -m timeit "from main import *" "conductivity_vectorised()"
+echo ""
+
+echo "Timing determine_next_filename..."
+python -m timeit "from main import *" "determine_next_filename()"
+echo ""
