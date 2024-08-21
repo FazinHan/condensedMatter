@@ -27,15 +27,14 @@ def main(save):
     conductivities = []
 
     directory = os.path.join('output_data','results_version','run'+sys.argv[2])
+
+    lfname = os.path.join('output_data','results_version','length.npy')
     
     for root, _, fnames in os.walk(directory):
         for fname in fnames:
-	    if 'npy' in fname:	
-		lfname = fname
-            if 'params.txt' not in fname and 'txt' in fname:# and 'results_version' not in root:
-                with open(os.path.join(root, fname),'r') as file:
-                    data = eval(file.read())
-                    conductivities.append(data)
+            with open(os.path.join(root, fname),'r') as file:
+                data = eval(file.read())
+                conductivities.append(data)
     conductivities = np.array(conductivities)
     conductivities = np.sum(conductivities, axis=0)
     
