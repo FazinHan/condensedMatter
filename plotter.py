@@ -4,7 +4,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
 
-def plotter(L, conductivities, beta, save, folder=''):
+def plotter(L, conductivities, beta, folder=''):
     fig, axs = plt.subplots(2,1)
     
     axs[1].plot(L, conductivities,'.')
@@ -15,40 +15,21 @@ def plotter(L, conductivities, beta, save, folder=''):
     axs[0].set_ylabel('$\\beta$')
     fig.tight_layout()
     name = determine_next_filename('plot', folder=folder, filetype='png')#fname='eta_variance')
-    if save:
-        plt.savefig(name)
-        print('plotted to',name)
-        os.rename(os.path.join(folder,'params.txt'), name.strip('.png')+'_params.txt')
-        print('parameter file renamed to',name.strip('.png')+'_params.txt')
-    else:
-        plt.show()
+    plt.savefig(name)
+    print('plotted to',name)
+    os.rename(os.path.join(folder,'params.txt'), name.strip('.png')+'_params.txt')
+    print('parameter file renamed to',name.strip('.png')+'_params.txt')
 
-def main(save):
-    conductivities = []
+def main():
+    fname = determine_next_filename(folder=os.path.join('output_data','data'),fname='L_cond_data',filetype='txt',exists=True)
 
-    directory = os.path.join('output_data','results_version','run'+sys.argv[2])
-
-    lfname = os.path.join('output_data','results_version','length.npy')
-    
-    for root, _, fnames in os.walk(directory):
-        for fname in fnames:
-            with open(os.path.join(root, fname),'r') as file:
-                data = eval(file.read())
-                conductivities.append(data)
-    conductivities = np.array(conductivities)
-    conductivities = np.sum(conductivities, axis=0)
-    
-    #lfname = os.path.join(directory,'length1.npy')
-    with open(lfname,'rb') as file:
-        L = np.load(file)
+    with open(fname, 'r') as file:
+        L = eval(file.readline())
+        conductivities = eval(file.readline())
 
     cs = CubicSpline(np.log(L), np.log(conductivities))
     beta = cs(np.log(L), 1)
-    plotter(L, conductivities, beta, save, folder=directory)
+    plotter(L, conductivities, beta, folder=directory)
 
 if __name__=="__main__":
-    try:
-        save = sys.argv[1]
-    except IndexError:
-        save = False
-    main(save)
+    main()
