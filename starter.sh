@@ -8,6 +8,7 @@
 #SBATCH -A physics_engg
 #SBATCH --mem-per-cpu=200M
 #SBATCH --array=1-5%5
+#SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 

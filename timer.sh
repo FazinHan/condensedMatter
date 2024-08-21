@@ -4,6 +4,7 @@
 #SBATCH --ntasks=5
 
 module load conda
+module load parallel
 
 echo "===========FULL SYSTEM SIZE TIMER=========="
 

@@ -1,0 +1,12 @@
+l_min, l_max = 10, 40
+vf = 1
+h_cut = 1
+u = 1
+l0 = 0.3333333333333333
+N_i = 1
+eta = 1000000.0
+T = 0
+ef = 0
+configurations = 1
+k_space_size = 45
+scattering potential = <function gaussian_corr at 0x2b17d01563b0>
