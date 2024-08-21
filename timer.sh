@@ -13,6 +13,13 @@ export I_MPI_FABRICS=shm:tmi
 export I_MPI_DEBUG=9
 export OMP_NUM_THREADS=40
 
-echo "===========FULL SYSTEM SIZE TIMER=========="
+echo "===========FULL SYSTEM SIZE TIMER========="
 
-echo $OMPI_COMM_WORLD_RANK
+#mpirun -np 5 echo $(hostname)-$$
+
+counter=0
+
+echo `date`
+# Run 40 instances of your Python script in parallel with unique numbers
+srun --exclusive -N1 python temp.py
+echo `date`
