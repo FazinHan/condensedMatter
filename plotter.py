@@ -30,6 +30,8 @@ def main(save):
     
     for root, _, fnames in os.walk(directory):
         for fname in fnames:
+	    if 'npy' in fname:	
+		lfname = fname
             if 'params.txt' not in fname and 'txt' in fname:# and 'results_version' not in root:
                 with open(os.path.join(root, fname),'r') as file:
                     data = eval(file.read())
@@ -37,8 +39,8 @@ def main(save):
     conductivities = np.array(conductivities)
     conductivities = np.sum(conductivities, axis=0)
     
-    fname = os.path.join(directory,'length1.npy')
-    with open(fname,'rb') as file:
+    #lfname = os.path.join(directory,'length1.npy')
+    with open(lfname,'rb') as file:
         L = np.load(file)
 
     cs = CubicSpline(np.log(L), np.log(conductivities))
