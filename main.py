@@ -224,8 +224,10 @@ if __name__ == "__main__":
 
     dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
     
-    fname = determine_next_filename(fname='length',folder=dirname, filetype='npy')
-    np.save(fname, L[0])
+    fname = os.path.join('output_data','results_version','length.npy')
+
+    if not os.path.isfile(fname):
+        np.save(fname, L[0])
     if not os.path.isfile(os.path.join('output_data','results_version','params.txt')):
         with open(os.path.join('output_data','results_version','params.txt'),'w') as file:
             text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\neta = {eta}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\nscattering potential = {function}'''#\na = {a}'''
