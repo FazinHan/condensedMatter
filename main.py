@@ -171,9 +171,9 @@ def conductivity_vectorised(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size
         n_dagger, sx_n = np.meshgrid(vecs_conj[0,:],sx_vecs[0,:],sparse=True)
         n_prime_dagger_sx_n_mod2 += np.abs(n_dagger * sx_n)**2
 
-    kubo_term = factor * fd_diff / diff * n_prime_dagger_sx_n_mod2 / (diff + 1j*eta)
+    kubo_term = factor * fd_diff / diff * np.sum(n_prime_dagger_sx_n_mod2) / (diff + 1j*eta)
     
-    return np.sum(kubo_term)
+    return kubo_term
 
 def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
 
@@ -217,7 +217,8 @@ if __name__ == "__main__":
     
     L = [np.linspace(l_min, l_max,num_lengths)] * configurations
 
-    _ = [main(i) for i in L]
+    with ProcessPoolExecutor() as exe:
+        _ = exe.map(main, L)
 
     dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
     
