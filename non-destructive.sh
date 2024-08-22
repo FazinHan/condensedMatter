@@ -19,10 +19,13 @@ export OMP_NUM_THREADS=40
 runstring=(`echo ${SLURM_ARRAY_TASK_ID:-1}`)
 
 echo "========= Job started  at `date` on `hostname -s` =========="
+ntasks=$SLURM_NTASKS
 
-mpirun -np 40 python condensor.py ${runstring[*]}$OMPI_COMM_WORLD_RANK
+for num in $(seq 1 $ntasks)
 
-python plotter.py
+do
+srun --exclusive -N1 python condensor.py "${runstring[*]}${num}"
+done
 
 echo "========= Job finished at `date` =========="
 
