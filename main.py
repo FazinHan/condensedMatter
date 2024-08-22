@@ -120,9 +120,6 @@ def conductivity_for_n(E, n, L, eta=eta):
     return res
 
 def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
-    '''
-    1.95 s ± 440 ms per loop (mean ± std. dev. of 7 runs, 1 loop each) -> k_space_size = 51
-    '''
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
     ham = hamiltonian(L, R_I)
