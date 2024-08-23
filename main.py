@@ -168,10 +168,12 @@ def conductivity_vectorised(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size
 
     n_prime_dagger_sx_n_mod2 = np.zeros_like(ham)
     for i in range(vecs.shape[0]):
-        n_dagger, sx_n = np.meshgrid(vecs_conj[0,:],sx_vecs[0,:],sparse=True)
+        n_dagger, sx_n = np.meshgrid(vecs_conj[i,:],sx_vecs[i,:],sparse=True)
         n_prime_dagger_sx_n_mod2 += np.abs(n_dagger * sx_n)**2
 
     kubo_term = factor * fd_diff / diff * np.sum(n_prime_dagger_sx_n_mod2) / (diff + 1j*eta)
+
+    print(kubo_term)
     
     return kubo_term
 
