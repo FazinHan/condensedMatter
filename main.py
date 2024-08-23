@@ -1,10 +1,10 @@
-#import numpy as np
-#from scipy import stats
-#from scipy.fft import fft2, rfft2
-#from scipy.signal import fftconvolve
-#import matplotlib.pyplot as plt
-#from concurrent.futures import ProcessPoolExecutor
-#import os, warnings, sys, time
+import numpy as np
+from scipy import stats
+from scipy.fft import fft2, rfft2
+from scipy.signal import fftconvolve
+import matplotlib.pyplot as plt
+from concurrent.futures import ProcessPoolExecutor
+import os, warnings, sys, time
 
 '''implement a check on the hamiltoninan: σz(H)σz = −(H) '''
 
@@ -28,10 +28,10 @@ k_space_size = 45
 
 interaction_distance = 3
 
-#rng = np.random.default_rng()
+rng = np.random.default_rng()
 
-#sx = np.array([[0,1],[1,0]])
-#sy = 1j * np.array([[0,-1],[1,0]])
+sx = np.array([[0,1],[1,0]])
+sy = 1j * np.array([[0,-1],[1,0]])
 
 def gaussian_corr(q):
     return u * np.exp(-q**2*l0**2/2)
