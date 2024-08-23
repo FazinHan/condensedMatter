@@ -10,8 +10,6 @@
 #SBATCH --array=1-5%5
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 
-source /opt/ohpc/pub/intel2018/compilers_and_libraries_2018.1.163/linux/mkl/bin/mklvars.sh intel64
-
 echo "========= Job started  at `date` on `hostname -s` =========="
 
 export OMP_NUM_THREADS=1
