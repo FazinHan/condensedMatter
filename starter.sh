@@ -3,11 +3,11 @@
 #SBATCH --output=output_run1/fermion.%a.out
 #SBATCH --error=output_run1/fermion.%a.err
 #SBATCH --time=4-00:00:00
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=1
 #SBATCH --ntasks=40
 #SBATCH -A physics_engg
 #SBATCH --mem-per-cpu=200M
-#SBATCH --array=1-5%5
+#SBATCH --array=1-5
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 
 source /opt/ohpc/pub/intel2018/compilers_and_libraries_2018.1.163/linux/mkl/bin/mklvars.sh intel64
