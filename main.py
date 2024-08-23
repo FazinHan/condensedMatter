@@ -218,10 +218,7 @@ if __name__ == "__main__":
 
     import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
 
-    print(rank); exit()
-    
     os.mkdir(os.path.join('output_data','results_version','run'+sys.argv[1]+rank))
-
     
     L = [np.linspace(l_min, l_max,num_lengths)] * configurations
 
