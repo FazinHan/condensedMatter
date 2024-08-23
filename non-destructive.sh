@@ -7,9 +7,6 @@
 #SBATCH --ntasks=40
 
 module load conda
-module load intel/2018.0.1.163
-module unload gnu8/8.3.0
-source /opt/ohpc/pub/intel2018/compilers_and_libraries_2018.1.163/linux/mkl/bin/mklvars.sh intel64
 
 export I_MPI_FALLBACK=disable
 export I_MPI_FABRICS=shm:tmi
