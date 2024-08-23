@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 def main():
     conductivities = []
 
-    directory = os.path.join('output_data','results_version','run'+sys.argv[1])
+    directory = os.path.join('output_data','results_version')
 
     lfname = os.path.join('output_data','results_version','length.npy')
     
@@ -30,4 +30,6 @@ def main():
         file.write(conductivities)
 
 if __name__=="__main__":
-    main()
+    # main()
+    import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
+    
