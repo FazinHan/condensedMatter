@@ -12,6 +12,7 @@
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 
+export I_MPI_HYDRA_TOPOLIB=ipl
 export OMP_NUM_THREADS=1
 
 echo "Array job id : $SLURM_ARRAY_JOB_ID"
