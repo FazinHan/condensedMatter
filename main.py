@@ -145,7 +145,9 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
 
 def conductivity_vectorised(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
     '''
-    999.97s on default function call
+    999.97s on default function call: k_space_size = 45
+    
+    29.3 s ± 2.9 s per loop (mean ± std. dev. of 7 runs, 1 loop each): k_space_size = 20
     '''
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
 
@@ -185,7 +187,7 @@ def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
 
     print('conductivities computed')
 
-    conductivities = str(conductivities.real.tolist())
+    conductivities = str(conductivities.tolist())
 
     dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
     fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')

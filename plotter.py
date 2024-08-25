@@ -17,19 +17,20 @@ def plotter(L, conductivities, beta, folder=''):
     name = determine_next_filename('plot', folder=folder, filetype='png')#fname='eta_variance')
     plt.savefig(name)
     print('plotted to',name)
-    os.rename(os.path.join(folder,'params.txt'), name.strip('.png')+'_params.txt')
+    os.rename(os.path.join(folder,'results_version','params.txt'), name.strip('.png')+'_params.txt')
     print('parameter file renamed to',name.strip('.png')+'_params.txt')
 
 def main():
-    fname = determine_next_filename(folder=os.path.join('output_data','data'),fname='L_cond_data',filetype='txt',exists=True)
+    fname = determine_next_filename(folder=os.path.join('output_data','data'),fname='L_cond_data',filetype='npz',exists=True)
 
-    with open(fname, 'r') as file:
-        L = eval(file.readline())
-        conductivities = eval(file.readline())
+    with open(fname, 'rb') as file:
+        data = np.load(file)
+        L = data['L']
+        conductivities = data['conductivities']
 
     cs = CubicSpline(np.log(L), np.log(conductivities))
     beta = cs(np.log(L), 1)
-    plotter(L, conductivities, beta, folder=directory)
+    plotter(L, conductivities, beta, folder='output_data')
 
 if __name__=="__main__":
     main()
