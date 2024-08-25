@@ -107,8 +107,8 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
     return H0 #+ V_q
 
 
-def conductivity_for_n(E, n, L, eta=eta):
-    eta = vf * 2 * np.pi / L
+def conductivity_for_n(E, n, L, eta_factor=eta_factor):
+    eta = eta_factor * vf * 2 * np.pi / L
     _, _, kx, ky = get_k_space(L)
     sxx = np.kron(np.eye(kx.shape[0]), sx)
     fd_diff = fermi_dirac(E[0]) - fermi_dirac(E[1])
@@ -119,9 +119,10 @@ def conductivity_for_n(E, n, L, eta=eta):
     # print(res)
     return res
 
-def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
+def conductivity(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
+    eta = eta_factor * vf * 2 * np.pi / L
     ham = hamiltonian(L, R_I)
     if L == l_min:
         assert np.allclose(ham.T.conj(), ham)
@@ -143,13 +144,15 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
-def conductivity_vectorised(L=L, eta_ratio=eta_ratio, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
+def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
     '''
     999.97s on default function call: k_space_size = 45
     
     29.3 s ± 2.9 s per loop (mean ± std. dev. of 7 runs, 1 loop each): k_space_size = 20
     '''
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
+
+    eta = eta_factor * vf * 2 * np.pi / L
 
     ham = hamiltonian(L, R_I)
     if L == l_min:
@@ -183,7 +186,7 @@ def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
 
     print('main function run')
 
-    conductivities = np.array([conductivity_vectorised(l, eta, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2))) for l in L])
+    conductivities = np.array([conductivity_vectorised(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2))) for l in L])
 
     print('conductivities computed')
 
