@@ -19,15 +19,16 @@ echo "Array job id : $SLURM_ARRAY_JOB_ID"
 echo "Job id       : $SLURM_JOB_ID"
 echo "Array task id: $SLURM_ARRAY_TASK_ID"
 
-module load conda
-
 runstring=(`echo ${SLURM_ARRAY_TASK_ID:-1}`)
 echo "Track-ID: ${runstring[0]}"
 
 ntasks=$SLURM_NTASKS
 
-mpirun -np $ntasks python main.py "${runstring[*]}"
+for num in $(seq 1 $ntasks)
 
-wait $!
+do
+srun --exclusive -N1 --ntasks=1 python main.py "${runstring[*]}${num}"
+done
+
 
 echo "========= Job finished at `date` =========="

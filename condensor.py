@@ -30,6 +30,6 @@ def main():
         file.write(conductivities)
 
 if __name__=="__main__":
-    # main()
-    import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
+    main()
+    # import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
     

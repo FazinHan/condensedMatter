@@ -18,7 +18,11 @@ runstring=(`echo ${SLURM_ARRAY_TASK_ID:-1}`)
 echo "========= Job started  at `date` on `hostname -s` =========="
 ntasks=$SLURM_NTASKS
 
-mpirun -np $ntasks python condensor.py
+for num in $(seq 1 $ntasks)
+
+do
+srun --exclusive --ntasks=1 python condensor.py
+done
 
 echo "========= Job finished at `date` =========="
 
