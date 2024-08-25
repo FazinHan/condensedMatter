@@ -18,7 +18,7 @@ l0 = l_min / 30
 N_i = 1
 L = 10
 # l0 = L/30
-eta_factor = 1e3
+eta_factor = 1
 T = 0
 ef = 0
 # a = 1
@@ -103,8 +103,8 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
 
     sdotk = np.kron(sx, kx)+np.kron(sy, ky)
     H0 = vf * sdotk
-    # V_q = ft_potential_builder_3(L, R_I)
-    return H0 #+ V_q
+    V_q = ft_potential_builder_3(L, R_I)
+    return H0 + V_q
 
 
 def conductivity_for_n(E, n, L, eta_factor=eta_factor):
@@ -238,7 +238,7 @@ if __name__ == "__main__":
         np.save(fname, L[0])
     if not os.path.isfile(os.path.join('output_data','results_version','params.txt')):
         with open(os.path.join('output_data','results_version','params.txt'),'w') as file:
-            text = f'''l_min, l_max = {l_min}, {l_max}\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\nscattering potential = {function}'''#\na = {a}'''
+            text = f'''l_min, l_max = {l_min}, {l_max}\neta = {eta_factor} * vf * 2 * pi / L\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\nscattering potential = {function}'''#\na = {a}'''
             file.write(text)
             print('parameter file written')
     
