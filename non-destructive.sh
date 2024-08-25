@@ -9,5 +9,7 @@ echo "========= Job started  at `date` on `hostname -s` =========="
 
 python condensor.py
 
+python plotter.py
+
 echo "========= Job finished at `date` =========="
 
