@@ -1,0 +1,11 @@
+l_min, l_max = 10, 40
+vf = 1000.0
+h_cut = 1
+u = 1
+l0 = 0.3333333333333333
+N_i = 1
+T = 0
+ef = 0
+configurations = 1
+k_space_size = 20
+scattering potential = <function thomas_fermi at 0x2b3aff22d300>
