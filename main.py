@@ -18,7 +18,7 @@ l0 = l_min / 30
 N_i = 1
 L = 10
 # l0 = L/30
-eta = 1e6
+eta_factor = 1e3
 T = 0
 ef = 0
 # a = 1
@@ -143,7 +143,7 @@ def conductivity(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
-def conductivity_vectorised(L=L, eta=eta, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
+def conductivity_vectorised(L=L, eta_ratio=eta_ratio, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
     '''
     999.97s on default function call: k_space_size = 45
     
