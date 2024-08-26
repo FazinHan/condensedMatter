@@ -33,17 +33,19 @@ rng = np.random.default_rng()
 sx = np.array([[0,1],[1,0]])
 sy = 1j * np.array([[0,-1],[1,0]])
 
-def gaussian_corr(q):
+def gaussian_corr(q, u, l0):
     return u * np.exp(-q**2*l0**2/2)
 
-def thomas_fermi(q):
+def thomas_fermi(q, u, l0):
     return u / (q + l0**-1)
 
-try:
-    #sys.argv[2]
-    function = thomas_fermi
-except IndexError:
-    function = gaussian_corr
+# try:
+#     sys.argv[2]
+#     function = thomas_fermi
+# except IndexError:
+#     function = gaussian_corr
+
+function = gaussian_corr
     
 def get_k_space(L=L):
     '''
@@ -55,8 +57,8 @@ def get_k_space(L=L):
     
     cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
     
-    k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0]) # N^2
-    k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1])
+    k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0],sparse=True) # N^2
+    k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1],sparse=True)
 
     kx = k1x - k2x
     ky = k1y - k2y
@@ -65,7 +67,7 @@ def get_k_space(L=L):
     
     return kx, ky, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
 
-def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
+def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0):
     '''
     2min 2s ± 1.97 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
     '''
@@ -76,7 +78,7 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L*
     for i in range(N_i*int(L)**2):
         rands1 = np.ones_like(kx)*R_I[0,i]
         rands2 = np.ones_like(ky)*R_I[1,i] # may not be needed
-        k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 ) 
+        k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 , u, l0) 
 
     return np.kron(k_matrix,np.eye(2))/L**2
 
@@ -97,13 +99,13 @@ def fermi_dirac(x,T=T,ef=ef):
         return .5
     return 1
 
-def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))):
+def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0):
     '''1min 27s ± 3.7 s per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     _, _, kx, ky = get_k_space(L)
 
     sdotk = np.kron(sx, kx)+np.kron(sy, ky)
     H0 = vf * sdotk
-    V_q = ft_potential_builder_3(L, R_I)
+    V_q = ft_potential_builder_3(L, R_I, u, l0)
     return H0 + V_q
 
 
@@ -119,11 +121,11 @@ def conductivity_for_n(E, n, L, eta_factor=eta_factor):
     # print(res)
     return res
 
-def conductivity(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
+def conductivity(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0): # possibly the slowest function
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
     g_singular = 0
     eta = eta_factor * vf * 2 * np.pi / L
-    ham = hamiltonian(L, R_I)
+    ham = hamiltonian(L, R_I, u, l0)
     if L == l_min:
         assert np.allclose(ham.T.conj(), ham)
         # assert 
@@ -144,7 +146,7 @@ def conductivity(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,s
             g_singular += conductivity_for_n(E, n, L, eta)
     return g_singular * factor
 
-def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))): # possibly the slowest function
+def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0): # possibly the slowest function
     '''
     999.97s on default function call: k_space_size = 45
     
@@ -154,7 +156,7 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
 
     eta = eta_factor * vf * 2 * np.pi / L
 
-    ham = hamiltonian(L, R_I)
+    ham = hamiltonian(L, R_I, u, l0)
     if L == l_min:
         assert np.allclose(ham.T.conj(), ham)
         # assert 
@@ -186,7 +188,7 @@ def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
 
     print('main function run')
 
-    conductivities = np.array([conductivity_vectorised(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2))) for l in L])
+    conductivities = np.array([conductivity_vectorised(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2)), u, l0) for l in L])
 
     print('conductivities computed')
 
