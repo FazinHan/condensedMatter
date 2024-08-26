@@ -13,7 +13,7 @@ num_lengths = 15
 
 vf = 1e3
 h_cut = 1
-u = 1
+u = 1e2
 l0 = l_min / 30
 N_i = 10
 L = 10
