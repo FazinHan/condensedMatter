@@ -4,7 +4,7 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
 
-def plotter(L, conductivities, beta, folder=''):
+def plotter(L, conductivities, beta, data_name, folder=''):
     fig, axs = plt.subplots(2,1)
     
     axs[1].plot(L, conductivities,'.')
@@ -14,11 +14,12 @@ def plotter(L, conductivities, beta, folder=''):
     axs[0].set_xlabel('g')
     axs[0].set_ylabel('$\\beta$')
     fig.tight_layout()
-    name = determine_next_filename('plot', folder=folder, filetype='png')#fname='eta_variance')
-    plt.savefig(name)
-    print('plotted to',name)
-    os.rename(os.path.join(folder,'results_version','params.txt'), name.strip('.png')+'_params.txt')
-    print('parameter file renamed to',name.strip('.png')+'_params.txt')
+    name = 'plot_'+os.path.splitext(os.path.basename(data_name))[0]
+    plt.savefig(os.path.join(folder,name+'.png'))
+    print('plotted to',name+'.png')
+    param_name = os.path.join(folder, name+'_params.txt')
+    os.rename(os.path.join(folder,'results_version','params.txt'),param_name)
+    print('parameter file renamed to',param_name)
 
 def main():
     fname = determine_next_filename(folder=os.path.join('output_data','data'),fname='L_cond_data',filetype='npz',exists=True)
@@ -30,7 +31,7 @@ def main():
 
     cs = CubicSpline(np.log(L), np.log(conductivities))
     beta = cs(np.log(L), 1)
-    plotter(L, conductivities, beta, folder='output_data')
+    plotter(L, conductivities, beta, fname, folder='output_data')
 
 if __name__=="__main__":
     main()

@@ -148,7 +148,7 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
     '''
     999.97s on default function call: k_space_size = 45
     
-    29.3 s ± 2.9 s per loop (mean ± std. dev. of 7 runs, 1 loop each): k_space_size = 20
+    31.5 s ± 364 ms per loop (mean ± std. dev. of 7 runs, 1 loop each): k_space_size = 20
     '''
     factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
 
