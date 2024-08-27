@@ -1,7 +1,4 @@
 import numpy as np
-from scipy import stats
-from scipy.fft import fft2, rfft2
-from scipy.signal import fftconvolve
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
