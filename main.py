@@ -108,8 +108,8 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, 
 
 def conductivity_for_n(E, n, L, eta_factor=eta_factor):
     eta = eta_factor * vf * 2 * np.pi / L
-    _, _, kx, ky = get_k_space(L)
-    sxx = np.kron(np.eye(kx.shape[0]), sx)
+    _, _, kx, _ = get_k_space(L)
+    sxx = np.kron(sx, np.eye(kx.shape[0]))
     fd_diff = fermi_dirac(E[0]) - fermi_dirac(E[1])
     diff = E[0] - E[1]
     if diff == 0:
@@ -160,8 +160,8 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
     vals, vecs = np.linalg.eigh(ham) 
     '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
 
-    _, _, kx, ky = get_k_space(L)
-    sxx = np.kron(np.eye(kx.shape[0]), sx)
+    _, _, kx, _ = get_k_space(L)
+    sxx = np.kron(sx, np.eye(kx.shape[0]))
 
     sx_vecs = sxx @ vecs # i checked this, matrix multiplication is equivalent to multiplying vector-wise 
     vecs_conj = vecs.conj()
