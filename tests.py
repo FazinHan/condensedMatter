@@ -12,7 +12,7 @@ def test_hamiltonian():
     result = hamiltonian()
 
     assert np.allclose(result, result.conj().T)
-    assert np.allclose(sy @ result.conj() @ sy, result) # --> assertion error
+    assert np.allclose(1j*sy @ result.conj() @ (-1j*sy), result) # --> assertion error
 
     end_time = time.time()
 
