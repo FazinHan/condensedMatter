@@ -4,6 +4,7 @@
 #SBATCH --job-name=clean.up
 #SBATCH --output=output_run1/cleanup.out
 
+cd $SCRATCH/condensedMatter
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 
