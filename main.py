@@ -27,10 +27,10 @@ interaction_distance = 3
 
 rng = np.random.default_rng()
 
-sx = np.array([[0,1],[1,0]])
-sy = 1j * np.array([[0,-1],[1,0]])
-sz = np.eye(2)
-sz[-1,-1] = -1
+sx2 = np.array([[0,1],[1,0]])
+sy2 = 1j * np.array([[0,-1],[1,0]])
+sz2 = np.eye(2)
+sz2[-1,-1] = -1
 
 def gaussian_corr(q, u, l0):
     return u * np.exp(-q**2*l0**2/2)
@@ -67,9 +67,9 @@ def get_k_space(L=L):
     return kx, ky, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
 
 _, _, kx, _ = get_k_space(L)
-sx = np.kron(sx, np.eye(kx.shape[0]))
-sy = np.kron(sy, np.eye(kx.shape[0]))
-sz = np.kron(sz, np.eye(kx.shape[0]))
+sx = np.kron(np.eye(kx.shape[0]), sx2)
+sy = np.kron(np.eye(kx.shape[0]), sy2)
+sz = np.kron(np.eye(kx.shape[0]), sz2)
 
 def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0):
     '''
@@ -84,7 +84,7 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L*
         rands2 = np.ones_like(ky)*R_I[1,i] # may not be needed
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 , u, l0) 
 
-    return np.kron(np.eye(2), k_matrix)/L**2
+    return np.kron(k_matrix, np.eye(2))/L**2
 
 def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
     if T != 0:
@@ -107,7 +107,7 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, 
     '''1min 27s ± 3.7 s per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     _, _, kx, ky = get_k_space(L)
 
-    sdotk = sx*kx + sy*ky
+    sdotk = np.kron(kx, sx2) + np.kron(ky, sy2)
     H0 = vf * sdotk
     V_q = ft_potential_builder_3(L, R_I, u, l0)
     return H0 + V_q
