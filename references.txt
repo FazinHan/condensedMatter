@@ -2,3 +2,18 @@ https://journals.jps.jp/doi/10.1143/JPSJ.67.2421
 https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.98.076602
 https://arxiv.org/pdf/1402.6797
 Spin matrix. (2023, June 15). In Wikipedia. https://en.wikipedia.org/wiki/Spin_matrix
+
+@article{PhysRevB.50.7526,
+  title = {Integer quantum Hall transition: An alternative approach and exact results},
+  author = {Ludwig, Andreas W. W. and Fisher, Matthew P. A. and Shankar, R. and Grinstein, G.},
+  journal = {Phys. Rev. B},
+  volume = {50},
+  issue = {11},
+  pages = {7526--7552},
+  numpages = {0},
+  year = {1994},
+  month = {Sep},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevB.50.7526},
+  url = {https://link.aps.org/doi/10.1103/PhysRevB.50.7526}
+}

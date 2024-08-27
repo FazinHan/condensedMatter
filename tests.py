@@ -1,17 +1,27 @@
 from main import *
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
 def test_hamiltonian():
     sy = np.array([[0,-1j],[1j,0]])
+    sz = np.eye(2)
+    sz[-1,-1] = -1
     _, _, _, ky = get_k_space(L)
     sy = np.kron(sy, ky)
+    sz = np.kron(sz, ky)
 
     start_time = time.time()
 
     result = hamiltonian()
 
+    plt.matshow((sz @ result @ (-sz)) == result)
+    plt.savefig('szhsz_h.png')
+    plt.matshow((1j*sy @ result @ (-1j*sy)) == result)
+    plt.savefig('isyhisy_h.png')
+
     assert np.allclose(result, result.conj().T)
+    assert np.allclose(sz @ result @ (-sz), result) # --> assertion error
     assert np.allclose(1j*sy @ result.conj() @ (-1j*sy), result) # --> assertion error
 
     end_time = time.time()
