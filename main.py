@@ -112,43 +112,6 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, 
     V_q = ft_potential_builder_3(L, R_I, u, l0)
     return H0 + V_q
 
-
-def conductivity_for_n(E, n, L, eta_factor=eta_factor):
-    eta = eta_factor * vf * 2 * np.pi / L
-    
-    fd_diff = fermi_dirac(E[0]) - fermi_dirac(E[1])
-    diff = E[0] - E[1]
-    if diff == 0:
-        return 0
-    res = fd_diff / diff * ( n[0].T.conj() @ (sx @ n[1]) ) * ( n[1].T.conj() @ (sx @ n[0]) ) / ( diff + 1j * eta )
-    # print(res)
-    return res
-
-def conductivity(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0): # possibly the slowest function
-    factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
-    g_singular = 0
-    eta = eta_factor * vf * 2 * np.pi / L
-    ham = hamiltonian(L, R_I, u, l0)
-    if L == l_min:
-        assert np.allclose(ham.T.conj(), ham)
-        # assert 
-    vals, vecs = np.linalg.eigh(ham) 
-    '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
-    # for j in range(len(vals)):
-    #     for k in range(-interaction_distance,interaction_distance):
-    #         try:
-    #             E = [vals[j], vals[j+k]]
-    #             n = [vecs[j], vecs[j+k]]
-    #             g_singular += conductivity_for_n(E, n, L, eta)
-    #         except IndexError:
-    #             pass
-    for j in range(len(vals)):
-        for k in range(len(vals)-j):
-            E = [vals[j], vals[k]]
-            n = [vecs[j], vecs[k]]
-            g_singular += conductivity_for_n(E, n, L, eta)
-    return g_singular * factor
-
 def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0): # possibly the slowest function
     '''
     999.97s on default function call: k_space_size = 45
