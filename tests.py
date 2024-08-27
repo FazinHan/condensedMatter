@@ -4,6 +4,8 @@ import time
 
 def test_hamiltonian():
     sy = np.array([[0,-1j],[1j,0]])
+    _, _, _, ky = get_k_space(L)
+    sy = np.kron(sy, ky)
 
     start_time = time.time()
 
