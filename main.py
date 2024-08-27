@@ -153,12 +153,28 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
 
     eta = eta_factor * vf * 2 * np.pi / L
 
-    ham = hamiltonian(L, R_I, u, l0)
+    
     if L == l_min:
+        start_time = time.time()
+        ham = hamiltonian(L, R_I, u, l0)
+        end_time = time.time()
+        vals, vecs = np.linalg.eigh(ham) 
+        diag_time = time.time()
+        execution_time = np.round(end_time - start_time, 3)
+        diag_time = np.round(diag_time - end_time, 3)
+        print(f"Hamiltonian computed in: {execution_time} seconds\nDiagonalised in {diag_time} seconds")
+        sy = np.array([[0,-1j],[1j,0]])
+        sz = np.eye(2)
+        sz[-1,-1] = -1
+        _, _, _, ky = get_k_space(L)
+        sy = np.kron(sy, ky)
+        sz = np.kron(sz, ky)
         assert np.allclose(ham.T.conj(), ham)
-        # assert 
-    vals, vecs = np.linalg.eigh(ham) 
-    '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
+        assert np.allclose(sz @ ham @ (-sz), ham) # --> assertion error
+        assert np.allclose(1j*sy @ ham.conj() @ (-1j*sy), ham) # --> assertion error
+    else:
+        ham = hamiltonian(L, R_I, u, l0)
+        vals, vecs = np.linalg.eigh(ham) 
 
     _, _, kx, _ = get_k_space(L)
     sxx = np.kron(sx, np.eye(kx.shape[0]))
@@ -185,9 +201,12 @@ def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
 
     print('main function run')
 
+    start_time = time.time()
     conductivities = np.array([conductivity_vectorised(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2)), u, l0) for l in L])
+    end_time = time.time()
+    execution_time = np.round(end_time - start_time, 3)
 
-    print('conductivities computed')
+    print(f'conductivities computed in {execution_time} seconds')
 
     conductivities = str(conductivities.tolist())
 
