@@ -27,8 +27,10 @@ interaction_distance = 3
 
 rng = np.random.default_rng()
 
-sx = np.array([[0,1],[1,0]])
-sy = 1j * np.array([[0,-1],[1,0]])
+sx2 = np.array([[0,1],[1,0]])
+sy2 = 1j * np.array([[0,-1],[1,0]])
+sz2 = np.eye(2)
+sz2[-1,-1] = -1
 
 def gaussian_corr(q, u, l0):
     return u * np.exp(-q**2*l0**2/2)
@@ -53,7 +55,7 @@ def get_k_space(L=L):
     k_vec = np.linspace(-lamda, lamda, k_space_size) # N
     
     cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
-    
+       
     k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0],sparse=True) # N^2
     k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1],sparse=True)
 
@@ -62,7 +64,12 @@ def get_k_space(L=L):
 
     # k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
     
-    return kx, ky, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
+    return kx, ky.T, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
+
+_, _, kx, _ = get_k_space(L)
+sx = np.kron(sx2, np.eye(kx.shape[0]))
+sy = np.kron(sy2, np.eye(kx.shape[0]))
+sz = np.kron(sz2, np.eye(kx.shape[0]))
 
 def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0):
     '''
@@ -77,7 +84,7 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L*
         rands2 = np.ones_like(ky)*R_I[1,i] # may not be needed
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 , u, l0) 
 
-    return np.kron(k_matrix,np.eye(2))/L**2
+    return np.kron(np.eye(2), k_matrix)/L**2
 
 def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
     if T != 0:
@@ -100,48 +107,10 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, 
     '''1min 27s ± 3.7 s per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     _, _, kx, ky = get_k_space(L)
 
-    sdotk = np.kron(sx, kx)+np.kron(sy, ky)
+    sdotk = np.kron(sx2, kx) + np.kron(sy2, ky)
     H0 = vf * sdotk
     V_q = ft_potential_builder_3(L, R_I, u, l0)
     return H0 + V_q
-
-
-def conductivity_for_n(E, n, L, eta_factor=eta_factor):
-    eta = eta_factor * vf * 2 * np.pi / L
-    _, _, kx, ky = get_k_space(L)
-    sxx = np.kron(np.eye(kx.shape[0]), sx)
-    fd_diff = fermi_dirac(E[0]) - fermi_dirac(E[1])
-    diff = E[0] - E[1]
-    if diff == 0:
-        return 0
-    res = fd_diff / diff * ( n[0].T.conj() @ (sxx @ n[1]) ) * ( n[1].T.conj() @ (sxx @ n[0]) ) / ( diff + 1j * eta )
-    # print(res)
-    return res
-
-def conductivity(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0): # possibly the slowest function
-    factor = -1j * 2 * np.pi * h_cut**2/L**2 * vf**2
-    g_singular = 0
-    eta = eta_factor * vf * 2 * np.pi / L
-    ham = hamiltonian(L, R_I, u, l0)
-    if L == l_min:
-        assert np.allclose(ham.T.conj(), ham)
-        # assert 
-    vals, vecs = np.linalg.eigh(ham) 
-    '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
-    # for j in range(len(vals)):
-    #     for k in range(-interaction_distance,interaction_distance):
-    #         try:
-    #             E = [vals[j], vals[j+k]]
-    #             n = [vecs[j], vecs[j+k]]
-    #             g_singular += conductivity_for_n(E, n, L, eta)
-    #         except IndexError:
-    #             pass
-    for j in range(len(vals)):
-        for k in range(len(vals)-j):
-            E = [vals[j], vals[k]]
-            n = [vecs[j], vecs[k]]
-            g_singular += conductivity_for_n(E, n, L, eta)
-    return g_singular * factor
 
 def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0): # possibly the slowest function
     '''
@@ -153,17 +122,24 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
 
     eta = eta_factor * vf * 2 * np.pi / L
 
-    ham = hamiltonian(L, R_I, u, l0)
+    
     if L == l_min:
+        start_time = time.time()
+        ham = hamiltonian(L, R_I, u, l0)
+        end_time = time.time()
+        vals, vecs = np.linalg.eigh(ham) 
+        diag_time = time.time()
+        execution_time = np.round(end_time - start_time, 3)
+        diag_time = np.round(diag_time - end_time, 3)
+        print(f"Hamiltonian computed in: {execution_time} seconds\nDiagonalised in {diag_time} seconds")
         assert np.allclose(ham.T.conj(), ham)
-        # assert 
-    vals, vecs = np.linalg.eigh(ham) 
-    '''np.linalg.eigh >>> 6.77 s ± 43.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
+        # assert np.allclose(sz @ ham @ (-sz), ham) # --> assertion error
+        assert np.allclose(1j*sy @ ham.conj() @ (-1j*sy), ham) # --> assertion error
+    else:
+        ham = hamiltonian(L, R_I, u, l0)
+        vals, vecs = np.linalg.eigh(ham) 
 
-    _, _, kx, ky = get_k_space(L)
-    sxx = np.kron(np.eye(kx.shape[0]), sx)
-
-    sx_vecs = sxx @ vecs # i checked this, matrix multiplication is equivalent to multiplying vector-wise 
+    sx_vecs = sx @ vecs # i checked this, matrix multiplication is equivalent to multiplying vector-wise 
     vecs_conj = vecs.conj()
 
     E0, E1 = np.meshgrid(vals, vals)
@@ -185,9 +161,12 @@ def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
 
     print('main function run')
 
+    start_time = time.time()
     conductivities = np.array([conductivity_vectorised(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2)), u, l0) for l in L])
+    end_time = time.time()
+    execution_time = np.round(end_time - start_time, 3)
 
-    print('conductivities computed')
+    print(f'conductivities computed in {execution_time} seconds')
 
     conductivities = str(conductivities.tolist())
 
@@ -240,40 +219,3 @@ if __name__ == "__main__":
             text = f'''l_min, l_max = {l_min}, {l_max}\neta = {eta_factor} * vf * 2 * pi / L\nvf = {vf}\nh_cut = {h_cut}\nu = {u}\nl0 = {l0}\nN_i = {N_i}\nT = {T}\nef = {ef}\nconfigurations = {configurations}\nk_space_size = {k_space_size}\nscattering potential = {function}'''#\na = {a}'''
             file.write(text)
             print('parameter file written')
-    
-   
-if __name__=="__main__1":
-
-    t0 = time.perf_counter()
-    potential3 = ft_potential_builder_3()
-    t2 = time.perf_counter()
-
-    print('wrong block')
-    assert 0
-    
-    print(f'{np.round(t2-t0,5)}s')
-
-
-
-    plt.pcolormesh(np.flip(np.abs(potential3),0))#, cmap='RdBu_r')
-    plt.xticks([])
-    plt.yticks([])
-    plt.colorbar(shrink=0.6)
-    plt.tight_layout()
-    plt.savefig(os.path.join('graphics','full_hamiltonian.png'))
-    # plt.show()
-
-if __name__=="__main__1":
-    # k1x, k1y, k2x, k2y = get_k_space(10)
-    # k = np.kron(sy,k2y)
-    # print(np.allclose(k, k.conj().T))
-    ham = hamiltonian()
-    assert np.allclose(ham, ham.T.conj())
-    plt.subplot(1,2,1)
-    # plt.pcolormesh(np.kron(sy, ky).imag)
-    plt.pcolormesh(ham.imag)
-    plt.subplot(1,2,2)
-    # plt.pcolormesh(k.imag.T)
-    plt.pcolormesh(ham.real)
-    # plt.pcolormesh(np.kron(sy, ky).imag.T)
-    plt.show()
