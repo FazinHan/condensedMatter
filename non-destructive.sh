@@ -20,4 +20,4 @@ mkdir output_data/results_version
 
 echo "========= Job finished at `date` =========="
 
-push
+
