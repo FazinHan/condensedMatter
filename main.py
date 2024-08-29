@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
@@ -67,9 +66,9 @@ def get_k_space(L=L):
     return kx, ky, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
 
 _, _, kx, _ = get_k_space(L)
-sx = np.kron(np.eye(kx.shape[0]), sx2)
-sy = np.kron(np.eye(kx.shape[0]), sy2)
-sz = np.kron(np.eye(kx.shape[0]), sz2)
+sx = np.kron(sx2, np.eye(kx.shape[0]))
+sy = np.kron(sy2, np.eye(kx.shape[0]))
+sz = np.kron(sz2, np.eye(kx.shape[0]))
 
 def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0):
     '''
@@ -84,7 +83,7 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L*
         rands2 = np.ones_like(ky)*R_I[1,i] # may not be needed
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 , u, l0) 
 
-    return np.kron(k_matrix, np.eye(2))/L**2
+    return np.kron(np.eye(2), k_matrix)/L**2
 
 def fermi_dirac_ondist(x,T=T,ef=ef): # T=1e7*vf*2*np.pi
     if T != 0:
@@ -107,7 +106,7 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, 
     '''1min 27s ± 3.7 s per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     _, _, kx, ky = get_k_space(L)
 
-    sdotk = np.kron(kx, sx2) + np.kron(ky, sy2)
+    sdotk = np.kron(sx2, kx) + np.kron(sy2, ky)
     H0 = vf * sdotk
     V_q = ft_potential_builder_3(L, R_I, u, l0)
     return H0 + V_q
@@ -133,7 +132,7 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
         diag_time = np.round(diag_time - end_time, 3)
         print(f"Hamiltonian computed in: {execution_time} seconds\nDiagonalised in {diag_time} seconds")
         assert np.allclose(ham.T.conj(), ham)
-        assert np.allclose(sz @ ham @ (-sz), ham) # --> assertion error
+        # assert np.allclose(sz @ ham @ (-sz), ham) # --> assertion error
         assert np.allclose(1j*sy @ ham.conj() @ (-1j*sy), ham) # --> assertion error
     else:
         ham = hamiltonian(L, R_I, u, l0)

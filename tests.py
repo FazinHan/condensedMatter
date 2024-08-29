@@ -3,22 +3,69 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
+def random(x):
+    return x
+
+def test_randomiser():
+    rng = np.random.default_rng()
+    with ProcessPoolExecutor(2) as executor:
+        results = list(executor.map(random, rng.standard_normal(size=(10,10))))
+    results1 = results[0]
+    results2 = results[1]
+    assert not np.allclose(results1, results2)
+    print('Randomiser is thread-safe')
+
+def test_k_space():
+
+    start_time = time.time()
+
+    k1, k2, k3, k4 = get_k_space()
+    k5, k6, k7, k8 = get_k_space()
+    assert np.allclose(k1, k5)
+    assert np.allclose(k2, k6)
+    assert np.allclose(k3, k7)
+    assert np.allclose(k4, k8)
+    print('>> k-space is reproducible')
+
+    end_time = time.time()
+
+    time_taken = np.round(end_time - start_time, 3)
+    print(f"k-space-tests passed\nTime taken: {time_taken} seconds")
+
 def test_hamiltonian():
     start_time = time.time()
 
     result = hamiltonian()
 
-    # plt.matshow((sz @ result @ (-sz)) == result)
-    # plt.colorbar()
-    # plt.savefig(os.path.join('outtests','szhsz_h.png'))
-    plt.matshow((1j*sy @ result.conj() @ (-1j*sy)) == result)
-    plt.colorbar()
+
+    lhs = 1j*sy @ result.conj() @ (-1j*sy)
+    rhs = result
+
+    truths = lhs == rhs
+
+
+    plt.subplot(2,3,1)
+    plt.pcolormesh(np.fliplr(lhs.real))
+    plt.subplot(2,3,5)
+    plt.pcolormesh(np.fliplr(lhs.imag))
+    plt.subplot(2,3,2)
+    plt.pcolormesh(np.fliplr(rhs.real))
+    plt.subplot(2,3,4)
+    plt.pcolormesh(np.fliplr(rhs.imag))
+    plt.subplot(2,3,3)
+    plt.pcolormesh(np.fliplr(truths))
     # plt.show()
-    plt.savefig(os.path.join('outtests','isyhisy_h.png'))
+    plt.tight_layout()
+
+    # plt.matshow(truths)
+    # plt.colorbar()
+    plt.show()
+    # plt.savefig(os.path.join('outtests','isyhisy_h.png'))
 
     assert np.allclose(result, result.conj().T)
-    assert np.allclose(1j*sy @ result.conj().T @ (-1j*sy), result) # --> assertion error
-    # assert np.allclose(sz @ result @ (-sz), result)
+    print('>> Hamiltonian is hermitian')
+    assert np.allclose(1j*sy @ result.conj() @ (-1j*sy), result) # --> assertion fails
+    print('>> Hamiltonian satisfies time-reversal symmetry')
 
     end_time = time.time()
 
@@ -43,5 +90,7 @@ def test_conductivity_vectorised_real_output(L=10):
     print(f"Conductivity tests passed\nTime taken: {time_taken} seconds")
 
 if __name__ == '__main__':
+    test_randomiser()
+    test_k_space()
     test_hamiltonian()
     test_conductivity_vectorised_real_output()
