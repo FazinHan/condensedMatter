@@ -1,16 +1,13 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
-
-'''implement a check on the hamiltoninan: σz(H)σz = −(H) '''
 
 l_min, l_max = 10,40
 num_lengths = 15
 
 vf = 1e3
 h_cut = 1
-u = 1e2
+u = 10
 l0 = l_min / 30
 N_i = 10
 L = 10
