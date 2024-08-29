@@ -196,7 +196,9 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
 
 if __name__ == "__main__":
 
-    # import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
+    import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
+    print(rank)
+    exit()
 
     os.mkdir(os.path.join('output_data','results_version','run'+sys.argv[1]))
     
