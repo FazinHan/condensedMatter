@@ -55,7 +55,7 @@ def get_k_space(L=L):
     k_vec = np.linspace(-lamda, lamda, k_space_size) # N
     
     cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
-    
+       
     k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0],sparse=True) # N^2
     k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1],sparse=True)
 
