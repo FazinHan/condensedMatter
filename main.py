@@ -1,10 +1,3 @@
-from mpi4py import MPI; rank = MPI.COMM_WORLD.Get_rank()
-
-#os.mkdir(os.path.join('output_data','results_version','run'+rank))
-
-print(rank)
-exit()
-
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
@@ -201,8 +194,7 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
             num -= 1
     return os.path.join(folder,filename(num))
 
-import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
-
+from mpi4py import MPI; rank = MPI.COMM_WORLD.Get_rank()
 os.mkdir(os.path.join('output_data','results_version','run'+rank))
 
 if __name__ == "__main__":
