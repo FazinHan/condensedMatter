@@ -37,31 +37,6 @@ def test_hamiltonian():
 
     result = hamiltonian()
 
-
-    lhs = 1j*sy @ result.conj() @ (-1j*sy)
-    rhs = result
-
-    truths = lhs == rhs
-
-
-    plt.subplot(2,3,1)
-    plt.pcolormesh(np.fliplr(lhs.real))
-    plt.subplot(2,3,5)
-    plt.pcolormesh(np.fliplr(lhs.imag))
-    plt.subplot(2,3,2)
-    plt.pcolormesh(np.fliplr(rhs.real))
-    plt.subplot(2,3,4)
-    plt.pcolormesh(np.fliplr(rhs.imag))
-    plt.subplot(2,3,3)
-    plt.pcolormesh(np.fliplr(truths))
-    # plt.show()
-    plt.tight_layout()
-
-    # plt.matshow(truths)
-    # plt.colorbar()
-    plt.show()
-    # plt.savefig(os.path.join('outtests','isyhisy_h.png'))
-
     assert np.allclose(result, result.conj().T)
     print('>> Hamiltonian is hermitian')
     assert np.allclose(1j*sy @ result.conj() @ (-1j*sy), result) # --> assertion fails

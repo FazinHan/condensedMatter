@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 import os, warnings, sys, time
 
@@ -63,7 +64,7 @@ def get_k_space(L=L):
 
     # k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
     
-    return kx, ky, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
+    return kx, ky.T, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
 
 _, _, kx, _ = get_k_space(L)
 sx = np.kron(sx2, np.eye(kx.shape[0]))
