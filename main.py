@@ -1,6 +1,6 @@
-import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
+from mpi4py import MPI; rank = MPI.COMM_WORLD.Get_rank()
 
-os.mkdir(os.path.join('output_data','results_version','run'+rank))
+#os.mkdir(os.path.join('output_data','results_version','run'+rank))
 
 print(rank)
 exit()
