@@ -27,7 +27,7 @@ ntasks=$SLURM_NTASKS
 for num in $(seq 1 $ntasks)
 
 do
-srun --exclusive -N1 --ntasks=1 python main.py "${runstring[*]}${num}"
+srun --exclusive -N1 --ntasks=1 python -O main.py "${runstring[*]}${num}"
 done
 
 
