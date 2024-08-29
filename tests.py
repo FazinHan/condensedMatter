@@ -13,7 +13,7 @@ def test_randomiser():
     results1 = results[0]
     results2 = results[1]
     assert not np.allclose(results1, results2)
-    print('Randomiser is thread-safe')
+    print('Randomiser is thread-safe\n')
 
 def test_k_space():
 
@@ -30,7 +30,7 @@ def test_k_space():
     end_time = time.time()
 
     time_taken = np.round(end_time - start_time, 3)
-    print(f"k-space-tests passed\nTime taken: {time_taken} seconds")
+    print(f"k-space-tests passed\nTime taken: {time_taken} seconds\n")
 
 def test_hamiltonian():
     start_time = time.time()
@@ -45,7 +45,7 @@ def test_hamiltonian():
     end_time = time.time()
 
     time_taken = np.round(end_time - start_time, 3)
-    print(f"Hamiltonian tests passed\nTime taken: {time_taken} seconds")
+    print(f"Hamiltonian tests passed\nTime taken: {time_taken} seconds\n")
 
 def test_conductivity_vectorised_real_output(L=10):
     eta_factor = 1000
