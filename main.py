@@ -167,7 +167,7 @@ def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
 
     conductivities = str(conductivities.tolist())
 
-    dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
+    dirname = os.path.join('output_data','results_version','run'+rank)
     fname = determine_next_filename(fname='output',folder=dirname, filetype='txt')
     write_file(fname, conductivities)
     print('conductivities stored')
@@ -194,20 +194,21 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
             num -= 1
     return os.path.join(folder,filename(num))
 
+import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
+
+os.mkdir(os.path.join('output_data','results_version','run'+rank))
+
+print(rank)
+exit()
+
 if __name__ == "__main__":
-
-    import mpi4py; rank = mpi4py.MPI.Comm().Get_rank()
-    print(rank)
-    exit()
-
-    os.mkdir(os.path.join('output_data','results_version','run'+sys.argv[1]))
     
     L = [np.linspace(l_min, l_max,num_lengths)] * configurations
 
     with ProcessPoolExecutor() as exe:
         _ = exe.map(main, L)
 
-    dirname = os.path.join('output_data','results_version','run'+sys.argv[1])
+    dirname = os.path.join('output_data','results_version','run'+rank)
     
     fname = os.path.join('output_data','results_version','length.npy')
 
