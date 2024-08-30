@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -N 1
+#SBATCH -N 5
 #SBATCH --job-name=tilted.fermion
 #SBATCH --output=output_run1/fermion.out
 #SBATCH --time=04:00:00
@@ -14,7 +14,7 @@ export OMP_NUM_THREADS=1
 
 echo "Job id       : $SLURM_JOB_ID"
 
-ntasks=40
+ntasks=200
 
 
 mpirun -np ${ntasks} python -O main.py
