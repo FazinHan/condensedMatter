@@ -27,7 +27,10 @@ def main():
     with open(fname, 'rb') as file:
         data = np.load(file)
         L = data['L']
-        conductivities = data['conductivities']
+        conductivities = data['conductivities'][0]
+
+    print(L.shape)
+    print(conductivities.shape)
 
     cs = CubicSpline(np.log(L), np.log(conductivities))
     beta = cs(np.log(L), 1)
