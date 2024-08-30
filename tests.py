@@ -89,14 +89,24 @@ def test_by_points():
     
     for i, j in cartesian_product:
         h = hamiltonian(i, j)
-        if np.allclose(1j*sy @ h.conj().T @ (-1j*sy), h):
+        if np.allclose(1j*sy @ h.conj() @ (-1j*sy), h):
             print(f'yes; h=\n{h}\nkx=\n{i}\nky=\n{j}')
     else:
         print('>>> k-points exhausted\n')
 
+def conductivity():
+    L = [l_min, l_max]
+    N_i = 1
+    conductivities = [conductivity_vectorised(l,R_I=rng.uniform(low=-l/2,high=l/2,size=(2,N_i*l**2)),u=1e5) for l in L]
+    plt.plot(L, conductivities,'.')
+    plt.xlabel('L')
+    plt.ylabel('g')
+    plt.show()
+
 if __name__ == '__main__':
-    test_randomiser()
-    test_k_space()
-    test_conductivity_vectorised_real_output()
-    test_by_points()
-    test_hamiltonian()
+    conductivity()
+    # test_randomiser()
+    # test_k_space()
+    # test_conductivity_vectorised_real_output()
+    # test_by_points()
+    # test_hamiltonian()

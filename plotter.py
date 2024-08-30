@@ -4,11 +4,12 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
 
-def plotter(L, conductivities, beta, data_name, folder=''):
+def plotter(L, sem, conductivities, beta, data_name, folder=''):
     fig, axs = plt.subplots(2,1)
     
     axs[1].plot(L, conductivities,'.')
     axs[0].plot(conductivities, beta,'.')
+    axs[1].errorbar(np.arange(conductivities.size), conductivities, yerr=sem, fmt='-o')
     axs[1].set_xlabel('L')
     axs[1].set_ylabel('g')
     axs[0].set_xlabel('g')
@@ -27,14 +28,15 @@ def main():
     with open(fname, 'rb') as file:
         data = np.load(file)
         L = data['L']
-        conductivities = data['conductivities'][0]
+        conductivities = data['conductivities']
+        sem = data['sem']
 
     print(L.shape)
     print(conductivities.shape)
 
     cs = CubicSpline(np.log(L), np.log(conductivities))
     beta = cs(np.log(L), 1)
-    plotter(L, conductivities, beta, fname, folder='output_data')
+    plotter(L, sem, conductivities, beta, fname, folder='output_data')
 
 if __name__=="__main__":
     main()

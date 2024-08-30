@@ -7,7 +7,7 @@ num_lengths = 15
 
 vf = 1e3
 h_cut = 1
-u = 1
+u = 1e3
 l0 = l_min / 30
 N_i = 10
 L = 10
@@ -76,7 +76,7 @@ def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L*
     
     k_matrix = np.zeros_like(kx, dtype=np.complex128)
     
-    for i in range(N_i*int(L)**2):
+    for i in range(R_I.shape[-1]):
         rands1 = np.ones_like(kx)*R_I[0,i]
         rands2 = np.ones_like(ky)*R_I[1,i] # may not be needed
         k_matrix += np.exp(1j * (kx * rands1 + ky * rands2)) * function( (kx**2 + ky**2)**.5 , u, l0) 

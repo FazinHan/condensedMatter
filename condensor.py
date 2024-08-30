@@ -1,5 +1,5 @@
 from main import determine_next_filename
-import os, sys
+import os
 import numpy as np
 from mpi4py import MPI
 
@@ -34,10 +34,12 @@ def parallelise():
 
         conductivities = np.mean(results, axis=0)
 
+        sem = np.std(results, axis=0) / np.sqrt(results.shape[0])
+
         fname = determine_next_filename(folder=os.path.join('output_data','data'),fname='L_cond_data',filetype='npz')
 
         with open(fname, 'wb') as file:
-            np.savez(file,L=L, conductivities=conductivities)
+            np.savez(file,L=L, conductivities=conductivities, sem=sem)
 
 
 if __name__=="__main__":
