@@ -2,7 +2,6 @@
 #SBATCH -N 5
 #SBATCH --job-name=tilted.fermion
 #SBATCH --output=output_run1/fermion.out
-#SBATCH --error=output_run1/fermion.err
 #SBATCH --time=04:00:00
 #SBATCH --ntasks-per-node=40
 #SBATCH -A physics_engg
@@ -20,7 +19,7 @@ ntasks=200
 
 mpirun -np ${ntasks} python -O main.py
 
-echo "========= Conductivities finished at `date` =========="
+echo "======== Conductivities finished at `date` ========="
 
 mpirun -np ${ntasks} python condensor.py
 
