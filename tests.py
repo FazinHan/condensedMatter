@@ -58,6 +58,7 @@ def test_conductivity_vectorised_real_output(L=10):
 
     conductivity = conductivity_vectorised(L, eta_factor, R_I, u, l0)
     assert np.allclose(conductivity.imag, 0, atol=1e-15)
+    print('>> Conductivity is real')
 
     end_time = time.time()
 
