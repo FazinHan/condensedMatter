@@ -67,13 +67,11 @@ def test_conductivity_vectorised_real_output(L=10):
 
 def test_by_points():
     
-    lamda = 20*np.pi/L
-    k_vec = np.linspace(-lamda, lamda, k_space_size) # N
-    cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
+    kx, ky, _, _ = get_k_space(L)
+
     
-    def potential(kx, ky):
+    def potential(kx, ky, R_i):
         gaus = u * np.exp(-(kx**2+ky**2)*l0**2/2)
-        R_i = rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))
         k_matrix = 0
         for i in range(N_i*int(L)**2):
             rands1 = R_i[0,i]
@@ -82,17 +80,18 @@ def test_by_points():
         return k_matrix/L**2
 
 
-    def hamiltonian(kx, ky):
-        sdotk = kx*sx+ky*sy
-        v_q = potential(kx,ky)
+    def hamiltonian(kx, ky, R_i):
+        sdotk = kx*sx2+ky*sy2
+        v_q = potential(kx,ky,R_i)
         return 1*sdotk + v_q
     
-    for i, j in cartesian_product:
-        h = hamiltonian(i, j)
-        if np.allclose(1j*sy @ h.conj() @ (-1j*sy), h):
+    for i, j in zip(kx.ravel(), ky.ravel()):
+        R_i = rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2))
+        h = hamiltonian(i, j, R_i)
+        if np.allclose(1j*sy2 @ h.conj() @ (-1j*sy2), h):
             print(f'yes; h=\n{h}\nkx=\n{i}\nky=\n{j}')
     else:
-        print('>>> k-points exhausted\n')
+        print('\n>>> k-points exhausted\n')
 
 def conductivity():
     L = [l_min, l_max]
@@ -104,9 +103,9 @@ def conductivity():
     plt.show()
 
 if __name__ == '__main__':
-    conductivity()
+    # conductivity()
     # test_randomiser()
     # test_k_space()
     # test_conductivity_vectorised_real_output()
-    # test_by_points()
+    test_by_points()
     # test_hamiltonian()

@@ -5,20 +5,23 @@ import os, time
 l_min, l_max = 10,40
 num_lengths = 15
 
-vf = 1e3
+vf = 1
 h_cut = 1
+# u = .1
 u = 1e3
+# l0 = 2
 l0 = l_min / 30
 N_i = 10
+# L = 20
 L = 10
 # l0 = L/30
-eta_factor = 1e3
+eta_factor = 1
 T = 0
 ef = 0
 # a = 1
 
 configurations = 1
-k_space_size = 20
+k_space_size = 10
 
 interaction_distance = 3
 
@@ -61,7 +64,7 @@ def get_k_space(L=L):
 
     # k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
     
-    return kx, ky.T, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
+    return kx, ky, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
 
 _, _, kx, _ = get_k_space(L)
 sx = np.kron(sx2, np.eye(kx.shape[0]))
