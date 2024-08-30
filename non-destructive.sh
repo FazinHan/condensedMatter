@@ -1,6 +1,7 @@
 #!/bin/bash
+#SBATCH -N 5
 #SBATCH -A physics_engg
-#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=40
 #SBATCH --job-name=clean.up
 #SBATCH --output=output_run1/cleanup.out
 
@@ -8,7 +9,7 @@ cd $SCRATCH/condensedMatter
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 
-python condensor.py
+mpirun -np 200 python condensor.py
 
 python plotter.py
 
