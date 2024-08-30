@@ -1,6 +1,6 @@
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
-import os, warnings, sys, time
+import os, time
 
 l_min, l_max = 10,40
 num_lengths = 15
