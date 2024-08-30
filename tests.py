@@ -67,5 +67,5 @@ def test_conductivity_vectorised_real_output(L=10):
 if __name__ == '__main__':
     test_randomiser()
     test_k_space()
-    test_hamiltonian()
     test_conductivity_vectorised_real_output()
+    test_hamiltonian()

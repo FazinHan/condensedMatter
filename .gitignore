@@ -163,3 +163,4 @@ cython_debug/
 *.out
 *.err
 fermionparallel
+tests.py
