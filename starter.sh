@@ -20,6 +20,16 @@ ntasks=200
 
 mpirun -np ${ntasks} python -O main.py
 
+echo "========= Conductivities finished at `date` =========="
 
+mpirun -np ${ntasks} python condensor.py
+
+python plotter.py
+
+mv --backup=t output_data/results_version $SCRATCH/data-condensedMatter
+
+echo "data sent to scratch"
+
+mkdir output_data/results_version
 
 echo "========= Job finished at `date` =========="
