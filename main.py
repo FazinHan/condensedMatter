@@ -154,7 +154,7 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
     
     return np.sum(kubo_term)
 
-def main(L=np.linspace(l_min,l_max,num_lengths)): # faster locally (single node)
+def main(L=np.linspace(l_min,l_max,num_lengths),rank=0): # faster locally (single node)
 
     print('main function run')
 
@@ -194,15 +194,14 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
             num -= 1
     return os.path.join(folder,filename(num))
 
-from mpi4py import MPI; rank = MPI.COMM_WORLD.Get_rank()
-os.mkdir(os.path.join('output_data','results_version','run'+str(rank)))
-
 if __name__ == "__main__":
+
+    from mpi4py import MPI; rank = MPI.COMM_WORLD.Get_rank()
+    os.mkdir(os.path.join('output_data','results_version','run'+str(rank)))
     
     L = [np.linspace(l_min, l_max,num_lengths)] * configurations
 
-    with ProcessPoolExecutor() as exe:
-        _ = exe.map(main, L)
+    [main(l_arr, rank) for l_arr in L]
 
     dirname = os.path.join('output_data','results_version','run'+str(rank))
     
