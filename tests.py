@@ -2,6 +2,7 @@ from main import *
 import numpy as np
 import time
 import matplotlib.pyplot as plt
+from concurrent.futures import ProcessPoolExecutor
 
 def random(x):
     return x
@@ -94,18 +95,27 @@ def test_by_points():
         print('\n>>> k-points exhausted\n')
 
 def conductivity():
-    L = [l_min, l_max]
+    L_list = [9, l_max]
     N_i = 1
-    conductivities = [conductivity_vectorised(l,R_I=rng.uniform(low=-l/2,high=l/2,size=(2,N_i*l**2)),u=1e5) for l in L]
-    plt.plot(L, conductivities,'.')
-    plt.xlabel('L')
-    plt.ylabel('g')
-    plt.show()
+    strengths = [1]*3
+    ranges = [l0]*3#,1e-3*l0, 1e-9*l0]
+    configurations = 10
+    for strength, Range in zip(strengths, ranges):
+        plt.figure()
+        conductivities = [[conductivity_vectorised(l,R_I=rng.uniform(low=-l/2,high=l/2,size=(2,N_i*l**2)),u=strength,l0=Range) for l in L_list] for _ in range(configurations)]
+        plt.plot(L_list, np.mean(conductivities, axis=0))#, label=f'u={strength}, l0={range}')
+        plt.title(f'$u={strength},l_0={Range}, configs={configurations}$')
+        plt.xlabel('L')
+        plt.ylabel('Conductivity')
+        plt.tight_layout()
+        name = determine_next_filename('Figure_',filetype='png',folder=r'C:\Users\freak\OneDrive\Desktop\cdoutputs')
+        plt.savefig(name)
+        plt.close()
 
 if __name__ == '__main__':
-    # conductivity()
+    conductivity()
     # test_randomiser()
     # test_k_space()
-    # test_conductivity_vectorised_real_output()
-    test_by_points()
+    test_conductivity_vectorised_real_output()
+    # test_by_points()
     # test_hamiltonian()

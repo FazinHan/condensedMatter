@@ -1,5 +1,4 @@
 import numpy as np
-from concurrent.futures import ProcessPoolExecutor
 import os, time
 
 l_min, l_max = 10,40
@@ -8,7 +7,7 @@ num_lengths = 15
 vf = 1
 h_cut = 1
 # u = .1
-u = 1e3
+u = 1
 # l0 = 2
 l0 = l_min / 30
 N_i = 10
