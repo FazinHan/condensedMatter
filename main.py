@@ -6,18 +6,14 @@ num_lengths = 15
 
 vf = 1
 h_cut = 1
-# u = .1
 u = 1
-# l0 = 2
 l0 = l_min / 30
 N_i = 10
-# L = 20
 L = 10
 # l0 = L/30
 eta_factor = 1
 T = 0
 ef = 0
-# a = 1
 
 configurations = 1
 k_space_size = 10
@@ -58,12 +54,12 @@ def get_k_space(L=L):
     k1x, k2x = np.meshgrid(cartesian_product[:,0], cartesian_product[:,0],sparse=True) # N^2
     k1y, k2y = np.meshgrid(cartesian_product[:,1], cartesian_product[:,1],sparse=True)
 
-    kx = k1x - k2x
-    ky = k1y - k2y
+    kx_interaction = k1x - k2x
+    ky_interaction = k1y - k2y
 
     # k1x, k1y = np.meshgrid(k_vec, k_vec) # N, N
     
-    return kx, ky, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
+    return kx_interaction, ky_interaction, np.diag(cartesian_product[:,0]), np.diag(cartesian_product[:,1])
 
 _, _, kx, _ = get_k_space(L)
 sx = np.kron(sx2, np.eye(kx.shape[0]))

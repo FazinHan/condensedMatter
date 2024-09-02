@@ -96,7 +96,7 @@ def test_by_points():
 
 def conductivity():
     L_list = [9, l_max]
-    N_i = 1
+    N_i = 10
     strengths = [1]*3
     ranges = [l0]*3#,1e-3*l0, 1e-9*l0]
     configurations = 10
@@ -117,5 +117,5 @@ if __name__ == '__main__':
     # test_randomiser()
     # test_k_space()
     test_conductivity_vectorised_real_output()
-    # test_by_points()
+    test_by_points()
     # test_hamiltonian()
