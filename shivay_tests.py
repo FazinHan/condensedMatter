@@ -11,6 +11,8 @@ rank = comm.Get_rank()
 if rank == 0:
     results = comm.gather(rand, root=0)
 
+    print(results)
+
     assert not np.allclose(results[0], results[1])
 
     print('Randomiser is thread-safe\n')
