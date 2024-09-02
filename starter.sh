@@ -17,7 +17,7 @@ echo "Job id       : $SLURM_JOB_ID"
 ntasks=200
 
 
-mpirun -np ${ntasks} python -O main.py
+# mpirun -np ${ntasks} python -O main.py
 
 echo "======== Conductivities finished at `date` ========="
 
