@@ -21,6 +21,8 @@ def plotter(L, sem, conductivities, beta, data_name, folder=''):
     param_name = os.path.join(folder, name+'_params.txt')
     os.rename(os.path.join(folder,'results_version','params.txt'),param_name)
     print('parameter file renamed to',param_name)
+    os.system('mv --backup=t $CM_WD/output_data/results_version $SCRATCH/data-condensedMatter')
+    print('results_version moved to data-condensedMatter')
 
 def main():
     fname = determine_next_filename(folder=os.path.join('output_data','data'),fname='L_cond_data',filetype='npz',exists=True)
