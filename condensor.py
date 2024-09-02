@@ -25,7 +25,7 @@ def parallelise():
     result = main(path)
 
     # Gather all results to the root process (process 0)
-    results = comm.gather(result, root=0)
+    results = comm.Gather(result, root=0)
 
     if rank == 0:
         lfname = os.path.join('output_data','results_version','length.npy')

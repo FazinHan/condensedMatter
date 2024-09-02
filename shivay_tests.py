@@ -16,3 +16,4 @@ if rank == 0:
     assert not np.allclose(results[0], results[1])
 
     print('Randomiser is thread-safe\n')
+
