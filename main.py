@@ -6,18 +6,14 @@ num_lengths = 15
 
 vf = 1
 h_cut = 1
-# u = .1
 u = 1
-# l0 = 2
 l0 = l_min / 30
 N_i = 10
-# L = 20
 L = 10
 # l0 = L/30
 eta_factor = 1
 T = 0
 ef = 0
-# a = 1
 
 configurations = 1
 k_space_size = 10
