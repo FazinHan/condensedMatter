@@ -198,14 +198,13 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
 if __name__ == "__main__":
 
     from mpi4py import MPI; rank = MPI.COMM_WORLD.Get_rank()
-    os.mkdir(os.path.join('output_data','results_version','run'+str(rank)))
+    dirname = os.path.join('output_data','results_version','run'+str(rank))
+    os.mkdir(dirname)
     
     L = [np.linspace(l_min, l_max,num_lengths)] * configurations
 
     [main(l_arr, rank) for l_arr in L]
 
-    dirname = os.path.join('output_data','results_version','run'+str(rank))
-    
     fname = os.path.join('output_data','results_version','length.npy')
 
     if not os.path.isfile(fname):
