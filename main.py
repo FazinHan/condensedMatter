@@ -7,7 +7,7 @@ num_lengths = 15
 vf = 1
 h_cut = 1
 u = 1
-l0 = l_min / 30
+l0 = l_min / 30 / 2
 N_i = 10
 L = 10
 # l0 = L/30
@@ -193,7 +193,7 @@ def determine_next_filename(fname='output',filetype='png',folder='graphics',dire
 
 if __name__ == "__main__":
 
-    from mpi4py import MPI; rank = MPI.COMM_WORLD.Get_rank()
+    from mpi4py import MPI; rank = MPI.COMM_WORLD.Get_rank() # type: ignore
     dirname = os.path.join('output_data','results_version','run'+str(rank))
     os.mkdir(dirname)
     
