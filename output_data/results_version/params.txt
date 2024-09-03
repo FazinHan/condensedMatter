@@ -9,4 +9,4 @@ T = 0
 ef = 0
 configurations = 1
 k_space_size = 10
-scattering potential = <function gaussian_corr at 0x2ae1a3ed51c0>
+scattering potential = <function gaussian_corr at 0x2b33314b91c0>

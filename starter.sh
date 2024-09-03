@@ -9,19 +9,21 @@
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 
-export I_MPI_HYDRA_TOPOLIB=ipl
-export OMP_NUM_THREADS=1
+#export I_MPI_HYDRA_TOPOLIB=ipl
+#export OMP_NUM_THREADS=1
 
 echo "Job id       : $SLURM_JOB_ID"
 
-ntasks=200
+export I_MPI_FALLBACK=disable
+export I_MPI_FABRICS=shm:tmi
+export I_MPI_DEBUG=9 
+export OMP_NUM_THREADS=40
 
-
-mpirun -np ${ntasks} python -O main.py
+#time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python -O main.py
 
 echo "======== Conductivities finished at `date` ========="
 
-mpirun -np ${ntasks} python condensor.py
+time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python condensor.py
 
 python plotter.py
 
