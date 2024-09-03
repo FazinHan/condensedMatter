@@ -13,6 +13,7 @@ def main():
                 with open(os.path.join(root, fname),'r') as file:
                     data = eval(file.read())
                     conductivities.append(data)
+                    print(data)
 
     return np.array(conductivities)
 
