@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH -N 5
+#SBATCH -N 1
 #SBATCH --job-name=tilted.fermion
 #SBATCH --output=output_run1/fermion.out
 #SBATCH --time=04:00:00
-#SBATCH --ntasks-per-node=40
+#SBATCH --ntasks-per-node=1
 #SBATCH -A physics_engg
 #SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 
