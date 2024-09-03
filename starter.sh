@@ -23,7 +23,7 @@ export OMP_NUM_THREADS=40
 
 echo "======== Conductivities finished at `date` ========="
 
-time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python condensor.py
+time python condensor.py
 
 python plotter.py
 
