@@ -30,7 +30,7 @@ def main():
     with open(fname, 'rb') as file:
         data = np.load(file)
         L = data['L']
-        conductivities = data['conductivities'][0]
+        conductivities = data['conductivities'][0]; print(conductivities.shape)
         sem = data['sem']
 
     print(L.shape)
