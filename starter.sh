@@ -19,7 +19,7 @@ export I_MPI_FABRICS=shm:tmi
 export I_MPI_DEBUG=9 
 export OMP_NUM_THREADS=40
 
-time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python -O main.py
+# time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python -O main.py
 
 echo "======== Conductivities finished at `date` ========="
 

@@ -26,7 +26,7 @@ def run():
 
     conductivities = np.mean(results, axis=0)
 
-    sem = np.std(results, axis=0) / np.sqrt(len(results))
+    sem = np.std(results, axis=0) / np.sqrt(results.shape[0])
 
     fname = determine_next_filename(folder=os.path.join('output_data','data'),fname='L_cond_data',filetype='npz')
 
