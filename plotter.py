@@ -7,9 +7,8 @@ import matplotlib.pyplot as plt
 def plotter(L, sem, conductivities, beta, data_name, folder=''):
     fig, axs = plt.subplots(2,1)
     
-    axs[1].plot(L, conductivities,'.')
     axs[0].plot(conductivities, beta,'.')
-    axs[1].errorbar(np.arange(conductivities.size), conductivities, yerr=sem, fmt='-o')
+    axs[1].errorbar(L, conductivities, yerr=sem, fmt='.')
     axs[1].set_xlabel('L')
     axs[1].set_ylabel('g')
     axs[0].set_xlabel('g')
