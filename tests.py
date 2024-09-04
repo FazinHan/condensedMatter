@@ -27,6 +27,8 @@ def test_k_space():
     assert np.allclose(k3, k7)
     assert np.allclose(k4, k8)
     print('>> k-space is reproducible')
+    assert np.allclose(k1+k1.T, np.zeros_like(k1))
+    print('>> k-space is anti-symmetric')
 
     end_time = time.time()
 
@@ -113,9 +115,9 @@ def conductivity():
         # plt.close()
 
 if __name__ == '__main__':
-    conductivity()
+    # conductivity()
     # test_randomiser()
-    # test_k_space()
+    test_k_space()
     # test_conductivity_vectorised_real_output()
     # test_by_points()
     # test_hamiltonian()
