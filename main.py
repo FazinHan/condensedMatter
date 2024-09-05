@@ -6,7 +6,7 @@ num_lengths = 15
 
 vf = 1
 h_cut = 1
-u = .1
+u = 1
 l0 = l_min / 30 
 N_i = 10
 L = 10
@@ -39,7 +39,7 @@ def thomas_fermi(q, u, l0):
 # except IndexError:
 #     function = gaussian_corr
 
-function = gaussian_corr
+function = thomas_fermi
     
 def get_k_space(L=L):
     '''
