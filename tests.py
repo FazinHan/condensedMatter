@@ -28,6 +28,7 @@ def test_k_space():
     assert np.allclose(k4, k8)
     print('>> k-space is reproducible')
     assert np.allclose(k1+k1.T, np.zeros_like(k1))
+    assert np.allclose(k2+k2.T, np.zeros_like(k2))
     print('>> k-space is anti-symmetric')
 
     end_time = time.time()
