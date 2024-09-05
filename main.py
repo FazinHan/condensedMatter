@@ -16,7 +16,7 @@ T = 0
 ef = 0
 
 configurations = 1
-k_space_size = 15
+k_space_size = 21
 
 interaction_distance = 3
 
