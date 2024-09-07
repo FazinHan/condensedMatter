@@ -28,6 +28,7 @@ def test_k_space():
     assert np.allclose(k4, k8)
     print('>> k-space is reproducible')
     assert np.allclose(k1+k1.T, np.zeros_like(k1))
+    assert np.allclose(k2+k2.T, np.zeros_like(k2))
     print('>> k-space is anti-symmetric')
 
     end_time = time.time()
@@ -63,10 +64,74 @@ def test_conductivity_vectorised_real_output(L=10):
     assert np.allclose(conductivity.imag, 0, atol=1e-15)
     print('>> Conductivity is real')
 
+    assert np.allclose(conductivity, conductivity_unvectorized(L, eta_factor, R_I, u, l0))
+
     end_time = time.time()
 
     time_taken = np.round(end_time - start_time, 3)
     print(f"Conductivity tests passed\nTime taken: {time_taken} seconds")
+
+def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
+    if R_I is None:
+        R_I = np.random.uniform(low=-L/2, high=L/2, size=(2, N_i * int(L)**2))
+    
+    factor = -1j * 2 * np.pi * h_cut**2 / L**2 * vf**2
+    eta = eta_factor * vf * 2 * np.pi / L
+    
+    if L == l_min:
+        start_time = time.time()
+        ham = hamiltonian(L, R_I, u, l0)
+        end_time = time.time()
+        vals, vecs = np.linalg.eigh(ham)
+        diag_time = time.time()
+        execution_time = np.round(end_time - start_time, 3)
+        diag_time = np.round(diag_time - end_time, 3)
+        print(f"\nHamiltonian computed in: {execution_time} seconds\nDiagonalised in {diag_time} seconds\n")
+    else:
+        ham = hamiltonian(L, R_I, u, l0)
+        vals, vecs = np.linalg.eigh(ham)
+    
+    sx_vecs = sx@vecs
+    vecs_conj = np.conjugate(vecs)
+    
+    E0 = []
+    E1 = []
+    
+    # Manually create the meshgrid for E0 and E1
+    for i in range(len(vals)):
+        for j in range(len(vals)):
+            E0.append(vals[i])
+            E1.append(vals[j])
+    
+    fd_diff = []
+    
+    # Compute the Fermi-Dirac difference manually
+    for i in range(len(E0)):
+        fd_diff.append(fermi_dirac_ondist(E0[i]) - fermi_dirac_ondist(E1[i]))
+    
+    diff = []
+    
+    # Compute the difference manually and add a small value to avoid division by zero
+    for i in range(len(E0)):
+        diff.append(E0[i] - E1[i] + 1e-10)
+    
+    n_prime_dagger_sx_n_mod2 = np.zeros_like(ham, dtype=complex)
+    
+    # Compute the summation for n_prime_dagger_sx_n_mod2
+    for i in range(len(vecs)):
+        for j in range(len(vecs)):
+            n_prime_dagger_sx_n_mod2[i, j] = 0
+            for k in range(len(vecs)):
+                n_prime_dagger_sx_n_mod2[i, j] += np.abs(vecs_conj[i, k] * sx_vecs[j, k])**2
+    
+    kubo_term = np.zeros_like(ham, dtype=complex)
+    
+    # Compute the Kubo term
+    for i in range(len(diff)):
+        kubo_term[i // len(vals), i % len(vals)] = factor * fd_diff[i] / diff[i] * n_prime_dagger_sx_n_mod2[i // len(vals), i % len(vals)] / (diff[i] + 1j * eta)
+    
+    # Return the summation of the Kubo term
+    return np.sum(kubo_term)
 
 def test_by_points():
     
@@ -118,6 +183,6 @@ if __name__ == '__main__':
     # conductivity()
     # test_randomiser()
     test_k_space()
-    # test_conductivity_vectorised_real_output()
+    test_conductivity_vectorised_real_output()
     # test_by_points()
     # test_hamiltonian()
