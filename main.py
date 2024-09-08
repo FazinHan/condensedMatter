@@ -15,7 +15,7 @@ eta_factor = 1
 T = 0
 ef = 0
 
-configurations = 1
+configurations = 25
 k_space_size = 21
 
 interaction_distance = 3
