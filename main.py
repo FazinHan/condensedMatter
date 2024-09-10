@@ -7,7 +7,7 @@ num_lengths = 15
 vf = 1
 h_cut = 1
 u = 1
-l0 = l_min / 30 /2
+l0 = l_min / 30 /4
 N_i = 10
 L = 10
 # l0 = L/30
@@ -15,7 +15,7 @@ eta_factor = 1
 T = 0
 ef = 0
 
-configurations = 25
+configurations = 1
 k_space_size = 21
 
 interaction_distance = 3
