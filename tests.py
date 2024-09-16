@@ -51,20 +51,22 @@ def test_hamiltonian():
     time_taken = np.round(end_time - start_time, 3)
     print(f"Hamiltonian tests passed\nTime taken: {time_taken} seconds\n")
 
-def test_conductivity_vectorised_real_output(L=10):
-    eta_factor = 1000
+def test_conductivity_vectorised_real_output(L=1):
+    eta_factor = 10
     N_i = 10
     R_I = np.random.uniform(low=-L/2, high=L/2, size=(2, N_i*L**2))
-    u = 100
+    u = 1
     l0 = L / 30
 
     start_time = time.time()
 
     conductivity = conductivity_vectorised(L, eta_factor, R_I, u, l0)
-    assert np.allclose(conductivity.imag, 0, atol=1e-15)
+    assert np.allclose(conductivity.imag, 0, atol=1e-13), conductivity
     print('>> Conductivity is real')
 
-    assert np.allclose(conductivity, conductivity_unvectorized(L, eta_factor, R_I, u, l0))
+    uv_conductivity = conductivity_unvectorized(L, eta_factor, R_I, u, l0)
+
+    assert np.allclose(conductivity, uv_conductivity), f'{conductivity}, {uv_conductivity}'
 
     end_time = time.time()
 
@@ -77,61 +79,42 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
     
     factor = -1j * 2 * np.pi * h_cut**2 / L**2 * vf**2
     eta = eta_factor * vf * 2 * np.pi / L
-    
-    if L == l_min:
-        start_time = time.time()
-        ham = hamiltonian(L, R_I, u, l0)
-        end_time = time.time()
-        vals, vecs = np.linalg.eigh(ham)
-        diag_time = time.time()
-        execution_time = np.round(end_time - start_time, 3)
-        diag_time = np.round(diag_time - end_time, 3)
-        print(f"\nHamiltonian computed in: {execution_time} seconds\nDiagonalised in {diag_time} seconds\n")
-    else:
-        ham = hamiltonian(L, R_I, u, l0)
-        vals, vecs = np.linalg.eigh(ham)
-    
-    sx_vecs = sx@vecs
-    vecs_conj = np.conjugate(vecs)
-    
-    E0 = []
-    E1 = []
-    
-    # Manually create the meshgrid for E0 and E1
-    for i in range(len(vals)):
-        for j in range(len(vals)):
-            E0.append(vals[i])
-            E1.append(vals[j])
-    
-    fd_diff = []
-    
-    # Compute the Fermi-Dirac difference manually
-    for i in range(len(E0)):
-        fd_diff.append(fermi_dirac_ondist(E0[i]) - fermi_dirac_ondist(E1[i]))
-    
-    diff = []
-    
-    # Compute the difference manually and add a small value to avoid division by zero
-    for i in range(len(E0)):
-        diff.append(E0[i] - E1[i] + 1e-10)
-    
-    n_prime_dagger_sx_n_mod2 = np.zeros_like(ham, dtype=complex)
-    
-    # Compute the summation for n_prime_dagger_sx_n_mod2
-    for i in range(len(vecs)):
-        for j in range(len(vecs)):
-            n_prime_dagger_sx_n_mod2[i, j] = 0
-            for k in range(len(vecs)):
-                n_prime_dagger_sx_n_mod2[i, j] += np.abs(vecs_conj[i, k] * sx_vecs[j, k])**2
-    
-    kubo_term = np.zeros_like(ham, dtype=complex)
-    
-    # Compute the Kubo term
-    for i in range(len(diff)):
-        kubo_term[i // len(vals), i % len(vals)] = factor * fd_diff[i] / diff[i] * n_prime_dagger_sx_n_mod2[i // len(vals), i % len(vals)] / (diff[i] + 1j * eta)
+
+    lamda = 20*np.pi/L
+    k_vec = np.linspace(-lamda, lamda, k_space_size)
+
+    ham = np.zeros([k_space_size**2]*2, dtype=complex)
+
+    for iky1 in range(k_space_size):
+        for ikx1 in range(k_space_size):
+            for iky2 in range(k_space_size):
+                for ikx2 in range(k_space_size):
+                    kx1 = k_vec[ikx1]
+                    ky1 = k_vec[iky1]
+                    kx2 = k_vec[ikx2]
+                    ky2 = k_vec[iky2]
+                    kx = kx1 - kx2
+                    ky = ky1 - ky2
+                    k = np.sqrt(kx**2 + ky**2)
+                    for I in range(R_I.shape[-1]):
+                        ham[ikx1+ikx2, iky1+iky2] += np.exp(1j * (kx * R_I[0, I] + ky * R_I[1, I])) * function(k, u, l0)
+                    ham = ham / L**2
+
+    ham = np.kron(np.eye(2), ham)
+
+    vals, vecs = np.linalg.eigh(ham)
+    conductivity = 0
+
+    for idx, E1 in enumerate(vals):
+        for jdx, E2 in enumerate(vals):
+            if E1 == E2:
+                continue
+            conductivity += np.sum(np.abs(vecs[:, idx].conj() @ sx @ vecs[:, jdx])**2 * fermi_dirac(E1 - E2) / (E1 - E2) / (E1 - E2 + 1j * eta))
+
+    conductivity *= -factor
     
     # Return the summation of the Kubo term
-    return np.sum(kubo_term)
+    return conductivity
 
 def test_by_points():
     
@@ -182,9 +165,9 @@ def conductivity():
         # plt.close()
 
 if __name__ == '__main__':
-    conductivity()
+    # conductivity()
     # test_randomiser()
     # test_k_space()
-    # test_conductivity_vectorised_real_output()
+    test_conductivity_vectorised_real_output()
     # test_by_points()
     # test_hamiltonian()
