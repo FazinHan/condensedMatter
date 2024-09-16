@@ -52,10 +52,10 @@ def test_hamiltonian():
     print(f"Hamiltonian tests passed\nTime taken: {time_taken} seconds\n")
 
 def test_conductivity_vectorised_real_output(L=1):
-    eta_factor = 10
+    eta_factor = 100
     N_i = 10
     R_I = np.random.uniform(low=-L/2, high=L/2, size=(2, N_i*L**2))
-    u = 1
+    u = 1e-5
     l0 = L / 30
 
     start_time = time.time()
@@ -83,7 +83,7 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
     lamda = 20*np.pi/L
     k_vec = np.linspace(-lamda, lamda, k_space_size)
 
-    ham = np.zeros([k_space_size**2]*2, dtype=complex)
+    potential = np.zeros([k_space_size**2]*2, dtype=complex)
 
     for iky1 in range(k_space_size):
         for ikx1 in range(k_space_size):
@@ -97,10 +97,16 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
                     ky = ky1 - ky2
                     k = np.sqrt(kx**2 + ky**2)
                     for I in range(R_I.shape[-1]):
-                        ham[ikx1+ikx2, iky1+iky2] += np.exp(1j * (kx * R_I[0, I] + ky * R_I[1, I])) * function(k, u, l0)
-                    ham = ham / L**2
+                        potential[ikx1+ikx2, iky1+iky2] += np.exp(1j * (kx * R_I[0, I] + ky * R_I[1, I])) * function(k, u, l0)
+                    potential = potential / L**2
 
-    ham = np.kron(np.eye(2), ham)
+    potential = np.kron(np.eye(2), potential)
+
+    _, _, kx, ky = get_k_space(L)
+
+    H0 = vf * (np.kron(sx2, kx) + np.kron(sy2, ky))
+
+    ham = H0 + potential
 
     vals, vecs = np.linalg.eigh(ham)
     conductivity = 0
@@ -109,12 +115,12 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
         for jdx, E2 in enumerate(vals):
             if E1 == E2:
                 continue
-            conductivity += np.sum(np.abs(vecs[:, idx].conj() @ sx @ vecs[:, jdx])**2 * fermi_dirac(E1 - E2) / (E1 - E2) / (E1 - E2 + 1j * eta))
+            conductivity += np.abs(vecs[:, idx].reshape(2*k_space_size**2,1).conj().T @ sx @ vecs[:, jdx].reshape(2*k_space_size**2,1))**2 * fermi_dirac(E1 - E2) / (E1 - E2) / (E1 - E2 + 1j * eta)
 
     conductivity *= -factor
     
     # Return the summation of the Kubo term
-    return conductivity
+    return conductivity[0,0]
 
 def test_by_points():
     
