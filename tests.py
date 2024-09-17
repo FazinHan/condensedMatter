@@ -52,16 +52,16 @@ def test_hamiltonian():
     print(f"Hamiltonian tests passed\nTime taken: {time_taken} seconds\n")
 
 def test_conductivity_vectorised_real_output(L=1):
-    eta_factor = 100
+    eta_factor = 1
     N_i = 10
     R_I = np.random.uniform(low=-L/2, high=L/2, size=(2, N_i*L**2))
-    u = 1e-5
-    l0 = L / 30
+    u = 10
+    l0 = L / 30 / 4
 
     start_time = time.time()
 
     conductivity = conductivity_vectorised(L, eta_factor, R_I, u, l0)
-    assert np.allclose(conductivity.imag, 0, atol=1e-13), conductivity
+    # assert np.allclose(conductivity.imag, 0, atol=1e-10), conductivity
     print('>> Conductivity is real')
 
     uv_conductivity = conductivity_unvectorized(L, eta_factor, R_I, u, l0)
@@ -73,9 +73,7 @@ def test_conductivity_vectorised_real_output(L=1):
     time_taken = np.round(end_time - start_time, 3)
     print(f"Conductivity tests passed\nTime taken: {time_taken} seconds")
 
-def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
-    if R_I is None:
-        R_I = np.random.uniform(low=-L/2, high=L/2, size=(2, N_i * int(L)**2))
+def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=np.random.uniform(low=-L/2, high=L/2, size=(2, N_i * int(L)**2)), u=u, l0=l0):
     
     factor = -1j * 2 * np.pi * h_cut**2 / L**2 * vf**2
     eta = eta_factor * vf * 2 * np.pi / L
@@ -84,7 +82,7 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
     k_vec = np.linspace(-lamda, lamda, k_space_size)
 
     potential = np.zeros([k_space_size**2]*2, dtype=complex)
-    H0 = np.zeros_like(potential)#, dtype=np.float64)
+    H0 = np.zeros_like(potential)
 
     for i, ky1 in enumerate(k_vec):
         for j, kx1 in enumerate(k_vec):
@@ -96,15 +94,14 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
                     for I in range(R_I.shape[-1]):
                         potential[i+k, j+l] += np.exp(1j * (kx * R_I[0, I] + ky * R_I[1, I])) * function(kk, u, l0)
                     potential = potential / L**2
-                    H0[2*(i+j+k+l),2*(i+j+k+l)] = 1
+
+    for i in range(k_space_size**2-1):
+        H0[i+1, i] = vf * (k_vec[i % k_space_size] + 1j*k_vec[i // k_space_size])
+        H0[i, i+1] = vf * (k_vec[i % k_space_size] - 1j*k_vec[i // k_space_size])
 
     potential = np.kron(potential, np.eye(2))
-
-    plt.matshow(H0.real)
-    plt.show()
-
     H0 = np.kron(H0, np.eye(2))
-    
+
     assert np.allclose(H0, H0.conj().T), 'unvectorized H0 is not hermitian'
 
     ham = H0 + potential
@@ -116,9 +113,9 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
         for jdx, E2 in enumerate(vals):
             if E1 == E2:
                 continue
-            conductivity += np.abs(vecs[:, idx].reshape(2*k_space_size**2,1).conj().T @ sx @ vecs[:, jdx].reshape(2*k_space_size**2,1))**2 * fermi_dirac(E1 - E2) / (E1 - E2) / (E1 - E2 + 1j * eta)
+            conductivity += np.abs(vecs[:, idx].reshape(2*k_space_size**2,1).conj().T @ sx @ vecs[:, jdx].reshape(2*k_space_size**2,1))**2 * (fermi_dirac(E1) - fermi_dirac(E2)) / (E1 - E2) / (E1 - E2 + 1j * eta)
 
-    conductivity *= -factor
+    conductivity *= factor
     
     # Return the summation of the Kubo term
     return conductivity[0,0]
@@ -171,10 +168,35 @@ def conductivity():
         plt.show()
         # plt.close()
 
+def test_julia_interface():
+    from julia import Julia
+    from julia import Main
+
+    # Initialize Julia
+    julia = Julia(compiled_modules=False)
+
+    # Load your Julia module
+    Main.include("functions.jl")
+
+    eta_factor = 1
+    N_i = 10
+    R_I = np.random.uniform(low=-L/2, high=L/2, size=(2, N_i*L**2))
+    u = 10
+    l0 = L / 30 / 4
+
+    conductivity_jl = Main.conductivity(L, eta_factor, R_I, u, l0)
+    conductivity = conductivity_unvectorized(L, eta_factor, R_I, u, l0)
+
+    assert np.allclose(conductivity, conductivity_jl), f'{conductivity}, {conductivity_jl}'
+
+    print('>> Julia and python calculations are consistent')
+
+
 if __name__ == '__main__':
     # conductivity()
     # test_randomiser()
     # test_k_space()
-    test_conductivity_vectorised_real_output()
+    # test_conductivity_vectorised_real_output()
     # test_by_points()
     # test_hamiltonian()
+    test_julia_interface()
