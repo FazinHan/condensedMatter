@@ -100,11 +100,22 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
                         potential[ikx1+ikx2, iky1+iky2] += np.exp(1j * (kx * R_I[0, I] + ky * R_I[1, I])) * function(k, u, l0)
                     potential = potential / L**2
 
+    H0 = np.zeros_like(potential, dtype=np.float64)
+
+
+    for i, ky in enumerate(k_vec):
+        for j, kx in enumerate(k_vec):
+            # H0[2*i, 2*j+1] = vf * (kx - 1j * ky)
+            # H0[2*i+1, 2*j] = vf * (kx + 1j * ky)
+            H0[i*j,i*j] = 1
+
     potential = np.kron(np.eye(2), potential)
+    H0 = np.kron(np.eye(2), H0)
 
-    _, _, kx, ky = get_k_space(L)
+    plt.matshow(H0)
+    plt.show()
 
-    H0 = vf * (np.kron(sx2, kx) + np.kron(sy2, ky))
+    assert np.allclose(H0, H0.conj().T), 'unvectorized H0 is not hermitian'
 
     ham = H0 + potential
 
