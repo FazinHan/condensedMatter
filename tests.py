@@ -84,37 +84,27 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=None, u=u, l0=l0):
     k_vec = np.linspace(-lamda, lamda, k_space_size)
 
     potential = np.zeros([k_space_size**2]*2, dtype=complex)
+    H0 = np.zeros_like(potential)#, dtype=np.float64)
 
-    for iky1 in range(k_space_size):
-        for ikx1 in range(k_space_size):
-            for iky2 in range(k_space_size):
-                for ikx2 in range(k_space_size):
-                    kx1 = k_vec[ikx1]
-                    ky1 = k_vec[iky1]
-                    kx2 = k_vec[ikx2]
-                    ky2 = k_vec[iky2]
+    for i, ky1 in enumerate(k_vec):
+        for j, kx1 in enumerate(k_vec):
+            for k, ky2 in enumerate(k_vec):
+                for l, kx2 in enumerate(k_vec):
                     kx = kx1 - kx2
                     ky = ky1 - ky2
-                    k = np.sqrt(kx**2 + ky**2)
+                    kk = np.sqrt(kx**2 + ky**2)
                     for I in range(R_I.shape[-1]):
-                        potential[ikx1+ikx2, iky1+iky2] += np.exp(1j * (kx * R_I[0, I] + ky * R_I[1, I])) * function(k, u, l0)
+                        potential[i+k, j+l] += np.exp(1j * (kx * R_I[0, I] + ky * R_I[1, I])) * function(kk, u, l0)
                     potential = potential / L**2
+                    H0[2*(i+j+k+l),2*(i+j+k+l)] = 1
 
-    H0 = np.zeros_like(potential, dtype=np.float64)
+    potential = np.kron(potential, np.eye(2))
 
-
-    for i, ky in enumerate(k_vec):
-        for j, kx in enumerate(k_vec):
-            # H0[2*i, 2*j+1] = vf * (kx - 1j * ky)
-            # H0[2*i+1, 2*j] = vf * (kx + 1j * ky)
-            H0[i*j,i*j] = 1
-
-    potential = np.kron(np.eye(2), potential)
-    H0 = np.kron(np.eye(2), H0)
-
-    plt.matshow(H0)
+    plt.matshow(H0.real)
     plt.show()
 
+    H0 = np.kron(H0, np.eye(2))
+    
     assert np.allclose(H0, H0.conj().T), 'unvectorized H0 is not hermitian'
 
     ham = H0 + potential
