@@ -1,5 +1,6 @@
 using PyCall
 using LinearAlgebra
+using Plots
 
 export conductivity
 
@@ -31,7 +32,7 @@ function thomas_fermi(q, u, l0)
     return u / (q + l0^(-1))
 end
 
-pot_function = thomas_fermi
+pot_function = gaussian_corr
 
 # Fermi-Dirac distribution
 function fermi_dirac(x, T=T, ef=ef)
@@ -82,8 +83,10 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=rand(Uniform(-L/2, L/2), 2
     potential = kron(potential, I(2))
     H0 = kron(H0, I(2))
 
+    heatmap(real(H0), title="Real part of H0", xlabel="Index", ylabel="Index")
+    heatmap(imag(H0), title="Imaginary part of H0", xlabel="Index", ylabel="Index")
     
-    @assert ishermitian(H0) "unvectorized H0 is not hermitian"
+    @assert ishermitian(H0) "julianic H0 is not hermitian"
 
     ham = H0 + potential
 
