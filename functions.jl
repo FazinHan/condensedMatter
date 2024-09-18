@@ -1,4 +1,5 @@
 using PyCall
+using LinearAlgebra
 
 export conductivity
 
@@ -74,13 +75,14 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=rand(Uniform(-L/2, L/2), 2
     end
 
     for i in 1:k_space_size^2-1
-        H0[i+1, i] = vf * (k_vec[mod(i, k_space_size)] + 1im * k_vec[div(i, k_space_size)])
-        H0[i, i+1] = vf * (k_vec[mod(i, k_space_size)] - 1im * k_vec[div(i, k_space_size)])
+        H0[i+1, i] = vf * (k_vec[mod(i, k_space_size)+1] + 1im * k_vec[div(i, k_space_size)+1])
+        H0[i, i+1] = vf * (k_vec[mod(i, k_space_size)+1] - 1im * k_vec[div(i, k_space_size)+1])
     end
 
     potential = kron(potential, I(2))
     H0 = kron(H0, I(2))
 
+    
     @assert ishermitian(H0) "unvectorized H0 is not hermitian"
 
     ham = H0 + potential
