@@ -48,6 +48,7 @@ N_i = py"N_i"
 l_min = py"l_min"
 l_max = py"l_max"
 num_lengths = py"num_lengths"
+configurations = py"configurations"
 
 # Gaussian correlation function
 function gaussian_corr(q, u, l0)
