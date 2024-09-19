@@ -3,6 +3,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
+from parameters import *
 
 def random(x):
     return x
@@ -80,10 +81,11 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=np.random.uniform(
 
     lamda = 20*np.pi/L
     k_vec = np.linspace(-lamda, lamda, k_space_size)
-    cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
 
     potential = np.zeros([k_space_size**2]*2, dtype=complex)
     H0 = np.zeros_like(potential)
+
+    cartesian_product = np.array(np.meshgrid(k_vec, k_vec, indexing='ij')).T.reshape(-1, 2)
 
     for i, (kx1, ky1) in enumerate(cartesian_product):
         for j, (kx2, ky2) in enumerate(cartesian_product):
@@ -92,7 +94,8 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=np.random.uniform(
             kk = np.sqrt(kx**2 + ky**2)
             for I in range(R_I.shape[-1]):
                 potential[i, j] += np.exp(1j * (kx * R_I[0, I] + ky * R_I[1, I])) * function(kk, u, l0)
-            potential = potential / L**2
+    
+    potential = potential / L**2
 
     for i in range(k_space_size**2-1):
         H0[i+1, i] = vf * (k_vec[i % k_space_size] + 1j*k_vec[i // k_space_size])
@@ -101,18 +104,17 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=np.random.uniform(
     potential = np.kron(potential, np.eye(2))
     H0 = np.kron(H0, np.eye(2))
 
-    assert np.allclose(H0, H0.conj().T), 'unvectorized H0 is not hermitian'
-
     ham = H0 + potential
+
+    assert np.allclose(ham, ham.conj().T), 'pythonic ham is not hermitian'
 
     vals, vecs = np.linalg.eigh(ham)
     conductivity = 0
 
     for idx, E1 in enumerate(vals):
         for jdx, E2 in enumerate(vals):
-            if E1 == E2:
-                continue
-            conductivity += np.abs(vecs[:, idx].reshape(2*k_space_size**2,1).conj().T @ sx @ vecs[:, jdx].reshape(2*k_space_size**2,1))**2 * (fermi_dirac(E1) - fermi_dirac(E2)) / (E1 - E2) / (E1 - E2 + 1j * eta)
+            if E1 != E2:
+                conductivity += np.abs(vecs[:, idx].reshape(2*k_space_size**2,1).conj().T @ sx @ vecs[:, jdx].reshape(2*k_space_size**2,1))**2 * (fermi_dirac(E1) - fermi_dirac(E2)) / (E1 - E2) / (E1 - E2 + 1j * eta)
 
     conductivity *= factor
     
@@ -185,9 +187,11 @@ def test_julia_interface():
 
     t0 = time.perf_counter()
     conductivity_jl = Main.conductivity(L, eta_factor, R_I, u, l0)
-    t1= time.perf_counter()
+    t1 = time.perf_counter()
     conductivity = conductivity_unvectorized(L, eta_factor, R_I, u, l0)
     t2 = time.perf_counter()
+
+    print(Main.cond)
 
     assert np.allclose(conductivity, conductivity_jl), f'{conductivity}, {conductivity_jl}'
 

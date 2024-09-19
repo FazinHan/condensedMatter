@@ -33,7 +33,7 @@ function thomas_fermi(q, u, l0)
     return u / (q + l0^(-1))
 end
 
-pot_function = gaussian_corr
+pot_function = thomas_fermi
 
 # Fermi-Dirac distribution
 function fermi_dirac(x, T=T, ef=ef)
@@ -58,10 +58,8 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
 
     potential = zeros(Complex{Float64}, (k_space_size^2, k_space_size^2))
     H0 = zeros(Complex{Float64}, (k_space_size^2, k_space_size^2))
-    kx_space = zeros(Complex{Float64}, (k_space_size^2, k_space_size^2))
-    ky_space = zeros(Complex{Float64}, (k_space_size^2, k_space_size^2))
+
     k_cartesian = [(kx, ky) for kx in k_vec, ky in k_vec]
-    
 
     for (i, (kx1, ky1)) in enumerate(k_cartesian)
         for (j, (kx2, ky2)) in enumerate(k_cartesian)
@@ -72,8 +70,9 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
                 potential[i, j] += exp(1im * (kx * R_I[1, I] + ky * R_I[2, I])) * pot_function(kk, u, l0)
             end
         end
-        potential /= L^2
     end
+
+    potential /= L^2
 
     for i in 1:k_space_size^2-1
         H0[i+1, i] = vf * (k_vec[mod(i, k_space_size)+1] + 1im * k_vec[div(i, k_space_size)+1])
@@ -85,7 +84,7 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
     sx = kron(I(k_space_size^2), sx2)
     ham = H0 + potential
 
-    # @assert ishermitian(ham) "julianic hamiltonian is not hermitian"
+    @assert ishermitian(ham) "julianic hamiltonian is not hermitian"
 
     vals, vecs = eigen(ham)
     conductivity = 0.0
@@ -103,5 +102,3 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
     # return kx_space, ky_space, potential
     return conductivity
 end
-
-# x, y, pot = conductivity()
