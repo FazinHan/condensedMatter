@@ -44,6 +44,8 @@ vf = py"vf"
 sx2 = py"sx2"
 k_space_size = py"k_space_size"
 N_i = py"N_i"
+l_min = py"l_min"
+l_max = py"l_max"
 
 # Gaussian correlation function
 function gaussian_corr(q, u, l0)
