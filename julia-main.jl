@@ -7,6 +7,7 @@ using Dates
 using Printf
 using Serialization  # For file handling
 using DelimitedFiles  # For saving parameter files
+using Distributions
 
 # Function to determine the next filename (similar to determine_next_filename in Python)
 function determine_next_filename(fname::String, folder::String, filetype::String)
