@@ -1,4 +1,7 @@
 using PyCall
+using LinearAlgebra
+using Random
+using PyPlot
 
 export conductivity
 
@@ -45,8 +48,7 @@ function fermi_dirac(x, T=T, ef=ef)
     end
 end
 
-
-function conductivity(L=L, eta_factor=eta_factor, R_I=rand(Uniform(-L/2, L/2), 2, N_i * Int(L)^2), u=u, l0=l0)
+function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
     
     factor = -1im * 2 * π * h_cut^2 / L^2 * vf^2
     eta = eta_factor * vf * 2 * π / L
@@ -55,34 +57,31 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=rand(Uniform(-L/2, L/2), 2
     k_vec = range(-lamda, lamda, length=k_space_size)
 
     potential = zeros(Complex{Float64}, (k_space_size^2, k_space_size^2))
-    H0 = similar(potential)
+    H0 = zeros(Complex{Float64}, (k_space_size^2, k_space_size^2))
 
-    for (i, ky1) in enumerate(k_vec)
-        for (j, kx1) in enumerate(k_vec)
-            for (k, ky2) in enumerate(k_vec)
-                for (l, kx2) in enumerate(k_vec)
-                    kx = kx1 - kx2
-                    ky = ky1 - ky2
-                    kk = sqrt(kx^2 + ky^2)
-                    for I in 1:size(R_I, 2)
-                        potential[i+k, j+l] += exp(1im * (kx * R_I[1, I] + ky * R_I[2, I])) * pot_function(kk, u, l0)
-                    end
-                end
+    k_cartesian = [(kx, ky) for kx in k_vec, ky in k_vec]
+
+    for (i, (kx1, ky1)) in enumerate(k_cartesian)
+        for (j, (kx2, ky2)) in enumerate(k_cartesian)
+            kx = kx1 - kx2
+            ky = ky1 - ky2
+            kk = sqrt(kx^2 + ky^2)
+            for I in 1:size(R_I, 2)
+                potential[i, j] += exp(1im * (kx * R_I[1, I] + ky * R_I[2, I])) * pot_function(kk, u, l0)
             end
         end
-        potential /= L^2
     end
 
+    potential /= L^2
+
     for i in 1:k_space_size^2-1
-        H0[i+1, i] = vf * (k_vec[mod(i, k_space_size)] + 1im * k_vec[div(i, k_space_size)])
-        H0[i, i+1] = vf * (k_vec[mod(i, k_space_size)] - 1im * k_vec[div(i, k_space_size)])
+        H0[i+1, i] = vf * (k_vec[mod(i, k_space_size)+1] + 1im * k_vec[div(i, k_space_size)+1])
+        H0[i, i+1] = vf * (k_vec[mod(i, k_space_size)+1] - 1im * k_vec[div(i, k_space_size)+1])
     end
 
     potential = kron(potential, I(2))
     H0 = kron(H0, I(2))
-
-    @assert ishermitian(H0) "unvectorized H0 is not hermitian"
-
+    sx = kron(I(k_space_size^2), sx2)
     ham = H0 + potential
 
     vals, vecs = eigen(ham)
@@ -90,14 +89,14 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=rand(Uniform(-L/2, L/2), 2
 
     for (idx, E1) in enumerate(vals)
         for (jdx, E2) in enumerate(vals)
-            if E1 == E2
-                continue
+            if E1 != E2
+                conductivity += abs2(vecs[:, idx]' * sx * vecs[:, jdx]) * (fermi_dirac(E1) - fermi_dirac(E2)) / (E1 - E2) / (1im * eta + (E1 - E2))
             end
-            conductivity += abs2(vecs[:, idx]' * sx2 * vecs[:, jdx]) * (fermi_dirac(E1) - fermi_dirac(E2)) / (E1 - E2) / (1im * eta * (E1 - E2))
         end
     end
 
     conductivity *= factor
     
+    # return kx_space, ky_space, potential
     return conductivity
 end
