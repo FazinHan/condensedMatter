@@ -171,7 +171,7 @@ def conductivity():
         # plt.close()
 
 def test_julia_interface():
-    from julia import Julia
+    from julia.api import Julia
     from julia import Main
 
     # Initialize Julia
