@@ -1,7 +1,6 @@
+using MKL
 using PyCall
 using LinearAlgebra
-using Random
-using PyPlot
 
 export conductivity
 
