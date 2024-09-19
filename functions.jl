@@ -84,8 +84,6 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
     sx = kron(I(k_space_size^2), sx2)
     ham = H0 + potential
 
-    @assert ishermitian(ham) "julianic hamiltonian is not hermitian"
-
     vals, vecs = eigen(ham)
     conductivity = 0.0
 

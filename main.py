@@ -129,11 +129,19 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
     return np.sum(kubo_term)
 
 def main(L=np.linspace(l_min,l_max,num_lengths),rank=0): # faster locally (single node)
+    from julia import Julia
+    from julia import Main
+
+    # Initialize Julia
+    julia = Julia(compiled_modules=False)
+
+    # Load your Julia module
+    Main.include("functions.jl")
 
     print('main function run')
 
     start_time = time.time()
-    conductivities = np.array([conductivity_vectorised(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2)), u, l0) for l in L])
+    conductivities = np.array([Main.conductivity(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2)), u, l0) for l in L])
     end_time = time.time()
     execution_time = np.round(end_time - start_time, 3)
 

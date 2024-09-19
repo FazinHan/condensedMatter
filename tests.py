@@ -192,8 +192,6 @@ def test_julia_interface():
     conductivity = conductivity_unvectorized(L, eta_factor, R_I, u, l0)
     t2 = time.perf_counter()
 
-    print(Main.cond)
-
     assert np.allclose(conductivity, conductivity_jl), f'{conductivity}, {conductivity_jl}'
 
     print('>> Julia and python calculations are consistent')
