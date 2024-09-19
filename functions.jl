@@ -92,7 +92,7 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
     for (idx, E1) in enumerate(vals)
         for (jdx, E2) in enumerate(vals)
             if E1 != E2
-                conductivity += abs2(vecs[:, idx]' * sx * vecs[:, jdx]) * (fermi_dirac(real(E1)) - fermi_dirac(real(E2))) / (E1 - E2) / (1im * eta * (E1 - E2))
+                conductivity += abs2(vecs[:, idx]' * sx * vecs[:, jdx]) * (fermi_dirac(E1) - fermi_dirac(E2)) / (E1 - E2) / (1im * eta + (E1 - E2))
             end
         end
     end

@@ -103,6 +103,7 @@ def conductivity_unvectorized(L=L, eta_factor=eta_factor, R_I=np.random.uniform(
 
     potential = np.kron(potential, np.eye(2))
     H0 = np.kron(H0, np.eye(2))
+    sx = np.kron(np.eye(k_space_size**2), sx2)
 
     ham = H0 + potential
 
