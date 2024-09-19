@@ -164,40 +164,40 @@ L = [range(l_min, stop=l_max, length=num_lengths)] * configurations
 
 # Call the main function (assuming you've defined `main` in Julia)
 
-[main(l_arr, rank) for l_arr in L]
+# [main(l_arr, rank) for l_arr in L]
 
-# Define the filename for saving the length array
-fname = joinpath("output_data", "results_version", "length.npy")
+# # Define the filename for saving the length array
+# fname = joinpath("output_data", "results_version", "length.npy")
 
-# Check if the file exists before saving the array L[1] (just like np.save in Python)
-if !isfile(fname)
-    open(fname, "w") do f
-        serialize(f, L[1])
-    end
-end
+# # Check if the file exists before saving the array L[1] (just like np.save in Python)
+# if !isfile(fname)
+#     open(fname, "w") do f
+#         serialize(f, L[1])
+#     end
+# end
 
-# Check if the parameter file exists; if not, write it
-params_file = joinpath("output_data", "results_version", "params.txt")
-if !isfile(params_file)
-    open(params_file, "w") do file
-        text = """
-        l_min, l_max = $l_min, $l_max
-        eta = $eta_factor * $vf * 2 * π / L
-        vf = $vf
-        h_cut = $h_cut
-        u = $u
-        l0 = $l0
-        N_i = $N_i
-        T = $T
-        ef = $ef
-        configurations = $configurations
-        k_space_size = $k_space_size
-        scattering potential = $(function)
-        """
-        write(file, text)
-        println("Parameter file written")
-    end
-end
+# # Check if the parameter file exists; if not, write it
+# params_file = joinpath("output_data", "results_version", "params.txt")
+# if !isfile(params_file)
+#     open(params_file, "w") do file
+#         text = """
+#         l_min, l_max = $l_min, $l_max
+#         eta = $eta_factor * $vf * 2 * π / L
+#         vf = $vf
+#         h_cut = $h_cut
+#         u = $u
+#         l0 = $l0
+#         N_i = $N_i
+#         T = $T
+#         ef = $ef
+#         configurations = $configurations
+#         k_space_size = $k_space_size
+#         scattering potential = $(function)
+#         """
+#         write(file, text)
+#         println("Parameter file written")
+#     end
+# end
 
-# Finalize MPI
+# # Finalize MPI
 MPI.Finalize()
