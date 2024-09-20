@@ -166,11 +166,13 @@ dirname = joinpath("output_data", "results_version", "run$rank")
 mkpath(dirname)  # This creates the directory if it doesn't exist
 
 # Define L (equivalent of L array in Python)
-L = [range(l_min, stop=l_max, length=num_lengths)] * configurations
+L = range(l_min, stop=l_max, length=num_lengths)]
 
 # Call the main function (assuming you've defined `main` in Julia)
 
-[main(l_arr, rank) for l_arr in L]
+for _ in 1:configurations
+    main(L, rank)
+end
 
 # Define the filename for saving the length array
 fname = joinpath("output_data", "results_version", "length.npy")
