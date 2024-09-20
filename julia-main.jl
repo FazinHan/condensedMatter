@@ -132,7 +132,7 @@ end
 function main(L, rank)
     start_time = Dates.now()
 
-    conductivities = [conductivity(l, eta_factor, rand(Uniform(-l/2, l/2), 2, N_i*Int(l)^2), u, l0) for l in L]
+    conductivities = [conductivity(l, eta_factor, rand(Uniform(-l/2, l/2), 2, N_i*floor(Int, l)^2), u, l0) for l in L]
 
     end_time = Dates.now()
     execution_time = round(Dates.value(end_time - start_time) / 1e9, digits=3)  # in seconds
