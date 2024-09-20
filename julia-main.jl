@@ -166,7 +166,7 @@ dirname = joinpath("output_data", "results_version", "run$rank")
 mkpath(dirname)  # This creates the directory if it doesn't exist
 
 # Define L (equivalent of L array in Python)
-L = range(l_min, stop=l_max, length=num_lengths)]
+L = range(l_min, stop=l_max, length=num_lengths)
 
 # Call the main function (assuming you've defined `main` in Julia)
 
