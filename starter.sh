@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -N 5
+#SBATCH -N 1
 #SBATCH --job-name=tilted.fermion
 #SBATCH --output=output_run1/fermion.out
 #SBATCH --time=4-00:00:00
@@ -19,7 +19,9 @@ export I_MPI_FABRICS=shm:tmi
 export I_MPI_DEBUG=9 
 export OMP_NUM_THREADS=40
 
-time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 julia julia-main.jl
+source ~/.bashrc
+
+time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 /scratch/fizaank.phy21.iitbhu/julia-1.10.5/bin/julia julia-main.jl
 
 echo "======== Conductivities finished at `date` ========="
 
@@ -28,5 +30,7 @@ python condensor.py
 python plotter.py
 
 mkdir output_data/results_version
+
+push
 
 echo "========= Job finished at `date` =========="
