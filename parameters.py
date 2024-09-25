@@ -10,7 +10,7 @@ l0 = l_min / 30
 N_i = 10
 L = 10
 # l0 = L/30
-eta_factor = 100
+eta_factor = 1
 T = 0
 ef = 0
 
