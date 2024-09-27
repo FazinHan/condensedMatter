@@ -113,6 +113,10 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
     ham = H0 + potential
 
     vals, vecs = eigen(ham)
+
+    vals = vals[1:100]
+    vecs = vecs[:, 1:100]
+    
     conductivity = 0.0
 
     for (idx, E1) in enumerate(vals)
