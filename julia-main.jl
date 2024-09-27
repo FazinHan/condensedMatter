@@ -113,6 +113,10 @@ function conductivity(L=L, eta_factor=eta_factor, R_I=[0 1;1 2;2 3], u=u, l0=l0)
     ham = H0 + potential
 
     vals, vecs = eigen(ham)
+
+    vals = vals[1:100]
+    vecs = vecs[:, 1:100]
+    
     conductivity = 0.0
 
     for (idx, E1) in enumerate(vals)
@@ -132,7 +136,7 @@ end
 function main(L, rank)
     start_time = Dates.now()
 
-    conductivities = [conductivity(l, eta_factor, rand(Uniform(-l/2, l/2), 2, N_i*floor(Int, l)^2), u, l0) for l in L]
+    conductivities = [conductivity(l, eta_factor, rand(Uniform(-l/2, l/2), 2, N_i*floor(Int, l)), u, l0) for l in L]
 
     end_time = Dates.now()
     execution_time = round(Dates.value(end_time - start_time) / 1e9, digits=3)  # in seconds

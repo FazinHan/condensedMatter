@@ -1,6 +1,7 @@
 from main import determine_next_filename
 import os
 import numpy as np
+import re
 
 def main():
     conductivities = []
@@ -11,7 +12,13 @@ def main():
         for fname in fnames:
             if 'output' in fname and '.txt' in fname:
                 with open(os.path.join(root, fname),'r') as file:
-                    data = eval(file.read())
+
+                    julia_list_str = file.read()
+
+                    complex_numbers = re.findall(r'([\d.]+) \+ ([\d.]+)im', julia_list_str)
+
+                    data = [complex(float(real), float(imag)) for real, imag in complex_numbers]
+
                     conductivities.append(data)
                     #print(data)
 
