@@ -204,7 +204,7 @@ if !isfile(params_file)
         ef = $ef
         configurations = $configurations
         k_space_size = $k_space_size
-        scattering potential = $(function)
+        scattering potential = $function
         """
         write(file, text)
         println("Parameter file written")
