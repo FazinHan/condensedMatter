@@ -43,7 +43,7 @@ sx = np.kron(sx2, np.eye(kx.shape[0]))
 sy = np.kron(sy2, np.eye(kx.shape[0]))
 sz = np.kron(sz2, np.eye(kx.shape[0]))
 
-def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0):
+def ft_potential_builder_3(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L)), u=u, l0=l0):
     '''
     2min 2s ± 1.97 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
     '''
@@ -75,7 +75,7 @@ def fermi_dirac(x,T=T,ef=ef):
         return .5
     return 1
 
-def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0):
+def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L)), u=u, l0=l0):
     '''1min 27s ± 3.7 s per loop (mean ± std. dev. of 7 runs, 1 loop each)'''
     _, _, kx, ky = get_k_space(L)
 
@@ -84,7 +84,7 @@ def hamiltonian(L=L, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, 
     V_q = ft_potential_builder_3(L, R_I, u, l0)
     return H0 + V_q
 
-def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L**2)), u=u, l0=l0): # possibly the slowest function
+def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2,high=L/2,size=(2,N_i*L)), u=u, l0=l0): # possibly the slowest function
     '''
     999.97s on default function call: k_space_size = 45
     
@@ -109,6 +109,9 @@ def conductivity_vectorised(L=L, eta_factor=eta_factor, R_I=rng.uniform(low=-L/2
     else:
         ham = hamiltonian(L, R_I, u, l0)
         vals, vecs = np.linalg.eigh(ham) 
+
+    vals = vals[:100]
+    vecs = vecs[:, :100]
 
     sx_vecs = sx @ vecs # i checked this, matrix multiplication is equivalent to multiplying vector-wise 
     vecs_conj = vecs.conj()
@@ -141,7 +144,7 @@ def main(L=np.linspace(l_min,l_max,num_lengths),rank=0): # faster locally (singl
     print('main function run')
 
     start_time = time.time()
-    conductivities = np.array([Main.conductivity(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l)**2)), u, l0) for l in L])
+    conductivities = np.array([Main.conductivity(l, eta_factor, rng.uniform(low=-l/2,high=l/2,size=(2,N_i*int(l))), u, l0) for l in L])
     end_time = time.time()
     execution_time = np.round(end_time - start_time, 3)
 
