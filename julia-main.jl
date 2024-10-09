@@ -1,6 +1,5 @@
 using MKL
 using MPI
-using PyCall
 using LinearAlgebra
 using Random
 using Dates
@@ -29,27 +28,29 @@ end
 # Main computation
 export conductivity
 
-# Run the Python script
-py"""
-exec(open("parameters.py").read())
-"""
+l_min, l_max = 10,40
+num_lengths = 15
 
-# Access Python variables in Julia
-L = py"L"
-eta_factor = py"eta_factor"
-u = py"u"
-l0 = py"l0"
-T = py"T"
-ef = py"ef"
-h_cut = py"h_cut"
-vf = py"vf"
-sx2 = py"sx2"
-k_space_size = py"k_space_size"
-N_i = py"N_i"
-l_min = py"l_min"
-l_max = py"l_max"
-num_lengths = py"num_lengths"
-configurations = py"configurations"
+vf = 1
+h_cut = 1
+u = 10
+l0 = l_min / 30
+N_i = 10
+L = 10
+# l0 = L/30
+eta_factor = 1
+T = 0
+ef = 0
+
+configurations = 1
+k_space_size = 21
+
+interaction_distance = 3
+
+sx2 = [0 1; 1 0]
+sy2 = 1im * [0 -1; 1 0]
+sz2 = I(2)
+sz2[end, end] = -1
 
 # Gaussian correlation function
 function gaussian_corr(q, u, l0)
