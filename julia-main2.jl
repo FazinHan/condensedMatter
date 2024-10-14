@@ -26,8 +26,8 @@ end
 # Main computation
 export conductivity
 
-l_min, l_max = 10,40
-num_lengths = 15
+l_min, l_max = 30, 100
+num_lengths = 7
 
 vf = 1
 h_cut = 1
