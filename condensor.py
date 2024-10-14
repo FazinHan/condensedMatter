@@ -1,7 +1,24 @@
-from main import determine_next_filename
 import os
 import numpy as np
 import re
+
+def determine_next_filename(fname='output',filetype='png',folder='graphics',direc=False,exists=False):
+    num = 1
+    if direc:
+        filename = lambda num: f'{fname}{num}'
+        while os.path.isdir(os.path.join('.',folder,filename(num))):
+            num += 1
+        else:
+            if exists:
+                num -= 1
+        return os.path.join(folder,filename(num))
+    filename = lambda num: f'{fname}{num}.{filetype}'
+    while os.path.isfile(os.path.join('.',folder,filename(num))):
+        num += 1
+    else:
+        if exists:
+            num -= 1
+    return os.path.join(folder,filename(num))
 
 def main():
     conductivities = []

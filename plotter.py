@@ -1,8 +1,25 @@
-from main import determine_next_filename
 import sys, os
 import numpy as np
 from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
+
+def determine_next_filename(fname='output',filetype='png',folder='graphics',direc=False,exists=False):
+    num = 1
+    if direc:
+        filename = lambda num: f'{fname}{num}'
+        while os.path.isdir(os.path.join('.',folder,filename(num))):
+            num += 1
+        else:
+            if exists:
+                num -= 1
+        return os.path.join(folder,filename(num))
+    filename = lambda num: f'{fname}{num}.{filetype}'
+    while os.path.isfile(os.path.join('.',folder,filename(num))):
+        num += 1
+    else:
+        if exists:
+            num -= 1
+    return os.path.join(folder,filename(num))
 
 def plotter(L, sem, conductivities, beta, data_name, folder=''):
     fig, axs = plt.subplots(2,1)
@@ -20,8 +37,6 @@ def plotter(L, sem, conductivities, beta, data_name, folder=''):
     param_name = os.path.join(folder, name+'_params.txt')
     os.rename(os.path.join(folder,'results_version','params.txt'),param_name)
     print('parameter file renamed to',param_name)
-    os.system('mv --backup=t $CM_WD/output_data/results_version $SCRATCH/data-condensedMatter')
-    print('results_version moved to data-condensedMatter')
 
 def main():
     fname = determine_next_filename(folder=os.path.join('output_data','data'),fname='L_cond_data',filetype='npz',exists=True)

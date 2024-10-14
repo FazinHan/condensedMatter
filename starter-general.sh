@@ -1,11 +1,9 @@
 #!/bin/bash
 #SBATCH -N 5
 #SBATCH --job-name=tilted.fermion
-#SBATCH --output=output_run1/fermion.out
+#SBATCH --output=fermion.out
 #SBATCH --time=4-00:00:00
 #SBATCH --ntasks-per-node=40
-#SBATCH -A physics_engg
-#SBATCH --mail-user=fizaan.khan.phy21@iitbhu.ac.in
 
 echo "========= Job started  at `date` on `hostname -s` =========="
 
@@ -21,17 +19,16 @@ export OMP_NUM_THREADS=40
 
 source ~/.bashrc
 
-# time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 /scratch/fizaank.phy21.iitbhu/julia-1.10.5/bin/julia julia-main.jl
-time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python main.py
+module load julia
+
+time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 julia julia-main2.jl
+# time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python main.py
 
 echo "======== Conductivities finished at `date` ========="
 
 python condensor.py
 
 python plotter.py
-
-mv --backup=t $CM_WD/output_data/results_version $SCRATCH/data-condensedMatter
-echo "results_version moved to data-condensedMatter"
 
 mkdir output_data/results_version
 
