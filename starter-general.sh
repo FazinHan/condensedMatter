@@ -31,6 +31,4 @@ python plotter.py
 
 mkdir output_data/results_version
 
-push
-
 echo "========= Job finished at `date` =========="
