@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -N 5
+#SBATCH -N 1
 #SBATCH --job-name=tilted.fermion
 #SBATCH --output=fermion.out
 #SBATCH --time=4-00:00:00
