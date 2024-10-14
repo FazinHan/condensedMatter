@@ -113,8 +113,8 @@ function conductivity(L=L, eta_factor=eta_factor, u=u, l0=l0)
 
     vals, vecs = eigen(ham)
 
-    vals = vals[1:100]
-    vecs = vecs[:, 1:100]
+    # vals = vals[1:100]
+    # vecs = vecs[:, 1:100]
     
     conductivity = 0.0
 
