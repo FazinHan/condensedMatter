@@ -99,8 +99,6 @@ function conductivity(L=L, eta_factor=eta_factor, u=u, l0=l0)
         end
     end
 
-    println("debug")
-
     potential /= L^2
 
     for i in 1:k_space_size^2-1
@@ -123,7 +121,7 @@ function conductivity(L=L, eta_factor=eta_factor, u=u, l0=l0)
     for (idx, E1) in enumerate(vals)
         for (jdx, E2) in enumerate(vals)
             if E1 != E2
-                conductivity += abs2(vecs[:, idx]' * sx * vecs[:, jdx]) * (fermi_dirac(E1) - fermi_dirac(E2)) / (E1 - E2) / (1im * eta + (E1 - E2))
+                conductivity += abs2(vecs[:, idx]' * sx * vecs[:, jdx]) * (fermi_dirac(real(E1)) - fermi_dirac(real(E2))) / (real(E1) - real(E2)) / (1im * eta + (real(E1) - real(E2)))
             end
         end
     end
