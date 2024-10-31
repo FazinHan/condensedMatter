@@ -21,8 +21,8 @@ export OMP_NUM_THREADS=40
 
 source ~/.bashrc
 
-# time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 /scratch/fizaank.phy21.iitbhu/julia-1.10.5/bin/julia julia-main.jl
-time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python main.py
+time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 /scratch/fizaank.phy21.iitbhu/julia-1.10.5/bin/julia df_disorder_new.jl
+# time mpiexec.hydra -genv I_MPI_DEBUG 9 -n $SLURM_NTASKS -genv OMP_NUM_THREADS 40 python main.py
 
 echo "======== Conductivities finished at `date` ========="
 
