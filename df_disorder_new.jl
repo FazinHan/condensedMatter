@@ -167,7 +167,7 @@ if !isfile(fname)
     end
 end
 
-conductivities_str = string(bg)
+conductivities_str = string(g_avg)
 
 function determine_next_filename(fname::String, folder::String, filetype::String)
     files = readdir(folder)
