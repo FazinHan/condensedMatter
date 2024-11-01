@@ -120,7 +120,11 @@ for lsize = 1:length(L)
             
             g = g + tem*2*1im*pi/L[lsize]^2
 
-            println("config: ", iter, " g: ", g)
+            if abs(imag(g)) < 1e-7
+                g = real(g)
+            end
+
+            # println("config: ", iter, " g: ", g)
          
     
         end  
