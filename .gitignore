@@ -166,3 +166,4 @@ fermionparallel
 tests.py
 *.m
 # df_disorder_new.jl
+starter-general.sh

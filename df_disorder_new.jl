@@ -8,14 +8,14 @@ rank = MPI.Comm_rank(comm)
 
 # Create output directory based on the rank
 
-l_min, l_max = 10,40
-num_lengths = 5
+l_min, l_max = 30,120
+num_lengths = 10
 
 # Define L (equivalent of L array in Python)
 L = range(l_min, stop=l_max, length=num_lengths)
 
 k_grid = 50
-n_config = 1 
+n_config = 26
 u0 = 1
 l0 = 1
 # L = [10,20,30]
