@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<componentData>
+  <component>
+    <componentBaseName>pycli</componentBaseName>
+    <componentFileName>pycli_glnxa64_1725678441.enc</componentFileName>
+    <contentType>glnxa64</contentType>
+    <demo>0</demo>
+    <doc>0</doc>
+    <doc_build>0</doc_build>
+    <doc_search>0</doc_search>
+    <gpu>0</gpu>
+    <instrset>0</instrset>
+    <locale/>
+    <platformList>
+      <platform>glnxa64</platform>
+    </platformList>
+    <size>2030863</size>
+    <uncompressedBytes>6104960</uncompressedBytes>
+    <componentName>pycli_glnxa64</componentName>
+    <componentVersion>1725678441</componentVersion>
+  </component>
+</componentData>

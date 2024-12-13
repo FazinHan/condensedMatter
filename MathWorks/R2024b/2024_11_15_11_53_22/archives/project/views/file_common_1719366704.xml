@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<componentData>
+  <component>
+    <componentBaseName>project/views/file</componentBaseName>
+    <componentFileName>project/views/file_common_1719366704.enc</componentFileName>
+    <contentType>common</contentType>
+    <demo>0</demo>
+    <doc>0</doc>
+    <doc_build>0</doc_build>
+    <doc_search>0</doc_search>
+    <gpu>0</gpu>
+    <instrset>0</instrset>
+    <locale/>
+    <platformList>
+      <platform>glnxa64</platform>
+      <platform>maca64</platform>
+      <platform>maci64</platform>
+      <platform>win64</platform>
+    </platformList>
+    <size>1536</size>
+    <uncompressedBytes>813</uncompressedBytes>
+    <componentName>project/views/file_common</componentName>
+    <componentVersion>1719366704</componentVersion>
+  </component>
+</componentData>

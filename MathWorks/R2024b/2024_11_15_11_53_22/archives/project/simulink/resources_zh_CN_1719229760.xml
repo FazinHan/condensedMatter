@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<componentData>
+  <component>
+    <componentBaseName>project/simulink/resources</componentBaseName>
+    <componentFileName>project/simulink/resources_zh_CN_1719229760.enc</componentFileName>
+    <contentType>common</contentType>
+    <demo>0</demo>
+    <doc>0</doc>
+    <doc_build>0</doc_build>
+    <doc_search>0</doc_search>
+    <gpu>0</gpu>
+    <instrset>0</instrset>
+    <locale>zh_CN</locale>
+    <platformList>
+      <platform>glnxa64</platform>
+      <platform>maca64</platform>
+      <platform>maci64</platform>
+      <platform>win64</platform>
+    </platformList>
+    <size>8342</size>
+    <uncompressedBytes>13105</uncompressedBytes>
+    <componentName>project/simulink/resources_zh_CN</componentName>
+    <componentVersion>1719229760</componentVersion>
+  </component>
+</componentData>

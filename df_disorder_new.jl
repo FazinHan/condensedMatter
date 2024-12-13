@@ -15,7 +15,7 @@ num_lengths = 10
 L = range(l_min, stop=l_max, length=num_lengths)
 
 k_grid = 50
-n_config = 26
+n_config = 1 
 u0 = 1
 l0 = 1
 # L = [10,20,30]

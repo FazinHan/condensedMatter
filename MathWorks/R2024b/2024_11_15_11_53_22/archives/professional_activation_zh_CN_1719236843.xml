@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<componentData>
+  <component>
+    <componentBaseName>professional_activation</componentBaseName>
+    <componentFileName>professional_activation_zh_CN_1719236843.enc</componentFileName>
+    <contentType>common</contentType>
+    <demo>0</demo>
+    <doc>0</doc>
+    <doc_build>0</doc_build>
+    <doc_search>0</doc_search>
+    <gpu>0</gpu>
+    <instrset>0</instrset>
+    <locale>zh_CN</locale>
+    <platformList>
+      <platform>glnxa64</platform>
+      <platform>maca64</platform>
+      <platform>maci64</platform>
+      <platform>win64</platform>
+    </platformList>
+    <size>8519</size>
+    <uncompressedBytes>9872</uncompressedBytes>
+    <componentName>professional_activation_zh_CN</componentName>
+    <componentVersion>1719236843</componentVersion>
+  </component>
+</componentData>

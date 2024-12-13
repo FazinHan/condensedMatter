@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<componentData>
+  <component>
+    <componentBaseName>project/comparison</componentBaseName>
+    <componentFileName>project/comparison_common_1726829086.enc</componentFileName>
+    <contentType>common</contentType>
+    <demo>0</demo>
+    <doc>0</doc>
+    <doc_build>0</doc_build>
+    <doc_search>0</doc_search>
+    <gpu>0</gpu>
+    <instrset>0</instrset>
+    <locale/>
+    <platformList>
+      <platform>glnxa64</platform>
+      <platform>maca64</platform>
+      <platform>maci64</platform>
+      <platform>win64</platform>
+    </platformList>
+    <size>85355</size>
+    <uncompressedBytes>114269</uncompressedBytes>
+    <componentName>project/comparison_common</componentName>
+    <componentVersion>1726829086</componentVersion>
+  </component>
+</componentData>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<componentData>
+  <component>
+    <componentBaseName>project/creation/zip</componentBaseName>
+    <componentFileName>project/creation/zip_glnxa64_1726830858.enc</componentFileName>
+    <contentType>glnxa64</contentType>
+    <demo>0</demo>
+    <doc>0</doc>
+    <doc_build>0</doc_build>
+    <doc_search>0</doc_search>
+    <gpu>0</gpu>
+    <instrset>0</instrset>
+    <locale/>
+    <platformList>
+      <platform>glnxa64</platform>
+    </platformList>
+    <size>88398</size>
+    <uncompressedBytes>222532</uncompressedBytes>
+    <componentName>project/creation/zip_glnxa64</componentName>
+    <componentVersion>1726830858</componentVersion>
+  </component>
+</componentData>
